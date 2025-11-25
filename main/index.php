@@ -48,7 +48,8 @@
       linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
     background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
     background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
-    font-family: "Unica One", sans-serif;
+    background-color: #0A0A0A;
+    font-family: system-ui, "Unica One", sans-serif;
     color: white;
     font-weight: 300;
     letter-spacing: .5px;
@@ -118,12 +119,12 @@
       <header class="p-6 mb-12 mx-auto">
         <div class="flex items-center justify-between">
           <!-- Logo -->
-          <a class="flex items-center space-x-3" href="/">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center">
-              <img src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/assets/favicon.svg"
-                alt="logo">
-            </div>
-            <span class="text-white text-2xl font-bold">Qwees_CorePro</span>
+          <a class="flex items-center space-x-3 relative w-[120px]" href="/">
+            <img src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/assets/favicon.svg"
+              alt="logo" class="h-10 w-10">
+            <!-- <span class="text-white text-2xl font-bold">QweesCore</span> -->
+            <img src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/assets/qwees_name.png"
+              alt="qwees name">
           </a>
 
           <!-- Navigation -->
@@ -169,7 +170,7 @@
         <!-- Main Headline -->
         <h1 class="text-5xl font-bold text-white leading-tight mb-6">
           Мощный и современный PHP-фреймворк для быстрого старта <span
-            class="mix-blend-color-dodge px-4 rounded-2xl bg-[#dbff7c] text-[#0a0a0a]">QweesCorePro</span>
+            class="mix-blend-color-dodge px-4 rounded-2xl bg-[#dbff7c] text-[#0a0a0a]">QweesCore</span>
         </h1>
 
         <!-- Sub-headline -->
@@ -292,13 +293,13 @@
 
     <main>
 
-      <section class="mx-auto relative m-4 p-4 pt-0 mt-0 mb-10">
+      <section class="mx-auto relative mb-20">
 
         <!-- Фоновое изображение -->
-        <div class="absolute inset-0 -z-10 view">
+        <!-- <div class="absolute inset-0 -z-10 view">
           <img src="https://i.pinimg.com/originals/39/b1/6b/39b16b66744a89df3e51cebfbfca8a3c.gif" alt="фон"
             class="w-full h-full object-cover opacity-50 rotate-180">
-        </div>
+        </div> -->
 
         <div class="mx-auto relative view">
           <h2 class="z-10 text-4xl mx-auto text-white text-center uppercase">Что нового?</h2>
@@ -498,7 +499,7 @@
           </div>
 
           <!-- Card 7: Аналитика и мониторинг -->
-          <div class="glassmorphism p-6 flex flex-col items-start text-left min-h-[260px] viewLeft">
+          <div class="glassmorphism p-6 flex flex-col items-start text-left min-h-[260px] view">
             <div class="flex items-center mb-3">
               <span class="bg-super-dark p-2 rounded-lg mr-2">
                 <i class="fa-solid fa-chart-line text-super-green text-xl"></i>
@@ -550,6 +551,10 @@
 
         </div>
       </section>
+
+      <footer class="w-full py-8 text-center text-gray-400 text-sm">
+        © <?php echo date("Y"); ?> QweesCore. Создавай будущее вместе с нами.
+      </footer>
 
     </main>
 
