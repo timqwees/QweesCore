@@ -9,8 +9,8 @@ async function QwesCore(url) {
   }
 }
 
-QwesCore('https://raw.githubusercontent.com/timqwees/QweesCore/view/main/index.php');
-// QwesCore('/public/pages/main/test.php');
+// QwesCore('https://raw.githubusercontent.com/timqwees/QweesCore/view/main/index.php');
+QwesCore('/public/pages/main/test.php');
 
 const conf = {
   distantion: 30,
