@@ -123,7 +123,8 @@
             <img src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/assets/favicon.svg"
               alt="logo" class="h-10 w-10">
             <!-- <span class="text-white text-2xl font-bold">QweesCore</span> -->
-            <img src="/public/pages/main/qwees_name.png" alt="qwees name">
+            <img src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/assets/qwees_name.png"
+              alt="qwees name">
           </a>
 
           <!-- Navigation -->
