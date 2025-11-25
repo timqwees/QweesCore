@@ -1,6 +1,4 @@
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- icon favicon -->
-<script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -540,12 +538,12 @@
   </div>
 </div>
 
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-<script defer src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/assets/view.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/assets/view.js"></script>
 
-<script defer>
+<script>
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
   // create the smooth scroller FIRST!
