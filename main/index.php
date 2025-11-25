@@ -1,9 +1,7 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-<!-- Font Awesome CDN for icon support -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-  crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/assets/js/main.js"></script>
 <style>
   ::-webkit-scrollbar {
     width: 0;
@@ -79,7 +77,7 @@
 
       <!-- Фоновое изображение -->
       <div class="absolute inset-0 -z-10 rounded-lg">
-        <img src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/2.gif" alt="фон"
+        <img src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/assets/img/2.gif" alt="фон"
           class="w-full h-full object-cover opacity-30">
       </div>
 
@@ -524,65 +522,3 @@
 
   </div>
 </div>
-
-<script>
-  gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
-
-  // create the smooth scroller FIRST!
-  let smoother = ScrollSmoother.create({
-    smooth: 1.5,
-    effects: true,
-    normalizeScroll: true
-  });
-
-  const conf = {
-    distantion: 30,
-    view: {
-      '0': '0rem',
-      '10': '10rem',
-      '-10': '-10rem'
-    },
-  };
-
-  function checkBlocksVisibility() {
-    const windowHeight = window.innerHeight;
-    const view = document.querySelectorAll('.View, .view');
-    const viewLeft = document.querySelectorAll('.viewLeft, .viewleft');
-    const viewRight = document.querySelectorAll('.viewRight, .viewright');
-
-    view.forEach(element => {
-      const viewHeight = element.getBoundingClientRect().top;
-      if (viewHeight < windowHeight - conf.distantion) {
-        element.style.opacity = '1';
-        element.style.transform = `translateY(${conf.view['0']})`;
-      } else {
-        element.style.opacity = '0';
-        element.style.transform = `translateY(${conf.view['10']})`;
-      }
-    });
-    viewLeft.forEach(element => {
-      const viewHeight = element.getBoundingClientRect().top;
-      if (viewHeight < windowHeight - conf.distantion) {
-        element.style.opacity = '1';
-        element.style.transform = `translateX(${conf.view['0']})`;
-      } else {
-        element.style.opacity = '0';
-        element.style.transform = `translateX(${conf.view['-10']})`;
-      }
-    });
-    viewRight.forEach(element => {
-      const viewHeight = element.getBoundingClientRect().top;
-      if (viewHeight < windowHeight - conf.distantion) {
-        element.style.opacity = '1';
-        element.style.transform = `translateX(${conf.view['0']})`;
-      } else {
-        element.style.opacity = '0';
-        element.style.transform = `translateX(${conf.view['10']})`;
-      }
-    });
-  }
-
-  checkBlocksVisibility();
-
-  window.addEventListener('scroll', checkBlocksVisibility);
-</script>
