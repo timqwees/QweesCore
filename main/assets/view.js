@@ -1,17 +1,3 @@
-async function QwesCore(url) {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Ошибка получения данных: ${response.status}`);
-    const veiw = await response.text();
-    document.getElementById('app').innerHTML = veiw;
-  } catch ($e) {
-    throw new Error($e);
-  }
-}
-
-// QwesCore('https://raw.githubusercontent.com/timqwees/QweesCore/view/main/index.php');
-QwesCore('/public/pages/main/test.php');
-
 const conf = {
   distantion: 30,
   view: {
