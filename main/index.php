@@ -1,106 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Qwees_CorePro Framework - Мощный PHP-фреймворк</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- icon favicon -->
-  <link rel="icon" type="image/png" href="app/Models/Network/assets/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="app/Models/Network/assets/favicon.svg" />
-  <link rel="shortcut icon" href="app/Models/Network/assets/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="app/Models/Network/assets/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="QweesCore" />
-  <link rel="manifest" href="app/Models/Network/assets/site.webmanifest" />
-  <!-- icon favicon -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'super-dark': '#0A0A0A',
-            'super-gray': '#1A1A1A',
-            'super-light-gray': '#2A2A2A',
-            'super-green': '#00FF88',
-            'super-blue': '#00D4FF'
-          }
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- icon favicon -->
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'super-dark': '#0A0A0A',
+          'super-gray': '#1A1A1A',
+          'super-light-gray': '#2A2A2A',
+          'super-green': '#00FF88',
+          'super-blue': '#00D4FF'
         }
       }
     }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet">
-  <!-- Font Awesome CDN for icon support -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <style>
-    ::-webkit-scrollbar {
-      width: 0;
+  }
+</script>
+<!-- Font Awesome CDN for icon support -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+  crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+  ::-webkit-scrollbar {
+    width: 0;
+  }
+
+  body {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, .07) 2px, transparent 2px),
+      linear-gradient(90deg, rgba(255, 255, 255, .07) 2px, transparent 2px),
+      linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+    background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+    background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+    font-family: "Unica One", sans-serif;
+    color: white;
+    font-weight: 300;
+    letter-spacing: .5px;
+    line-height: 1;
+  }
+
+  .glassmorphism {
+    background: rgba(26, 26, 26, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .light-beam {
+    background: linear-gradient(180deg, rgba(0, 255, 136, 0.3) 0%, rgba(0, 212, 255, 0.1) 100%);
+    animation: beam 3s ease-in-out infinite;
+  }
+
+  @keyframes beam {
+
+    0%,
+    100% {
+      opacity: 0.3;
     }
 
-    body {
-      background-image:
-        linear-gradient(rgba(255, 255, 255, .07) 2px, transparent 2px),
-        linear-gradient(90deg, rgba(255, 255, 255, .07) 2px, transparent 2px),
-        linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
-      background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
-      background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
-      font-family: "Unica One", sans-serif;
-      color: white;
-      font-weight: 300;
-      letter-spacing: .5px;
-      line-height: 1;
+    50% {
+      opacity: 0.6;
     }
+  }
 
-    .glassmorphism {
-      background: rgba(26, 26, 26, 0.8);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+  .hexagon {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
 
-    .light-beam {
-      background: linear-gradient(180deg, rgba(0, 255, 136, 0.3) 0%, rgba(0, 212, 255, 0.1) 100%);
-      animation: beam 3s ease-in-out infinite;
-    }
+  .glow {
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+  }
 
-    @keyframes beam {
+  ::selection {
+    color: #00ff88;
+    background: rgba(0, 255, 136, 0.15);
+  }
 
-      0%,
-      100% {
-        opacity: 0.3;
-      }
+  .selection {
+    color: #00ff88;
+    background: rgba(0, 255, 136, 0.15);
+  }
 
-      50% {
-        opacity: 0.6;
-      }
-    }
-
-    .hexagon {
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    }
-
-    .glow {
-      box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
-    }
-
-    ::selection {
-      color: #00ff88;
-      background: rgba(0, 255, 136, 0.15);
-    }
-
-    .selection {
-      color: #00ff88;
-      background: rgba(0, 255, 136, 0.15);
-    }
-
-    .view,
-    .viewLeft,
-    .viewRight {
-      transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-  </style>
+  .view,
+  .viewLeft,
+  .viewRight {
+    transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+</style>
 </head>
 
 <body class="bg-super-dark font-sans min-h-screen">
@@ -112,7 +96,8 @@
 
         <!-- Фоновое изображение -->
         <div class="absolute inset-0 -z-10 rounded-lg">
-          <img src="/public/pages/main/2.gif" alt="фон" class="w-full h-full object-cover opacity-30">
+          <img src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/2.gif" alt="фон"
+            class="w-full h-full object-cover opacity-30">
         </div>
 
         <!-- Header -->
@@ -121,7 +106,8 @@
             <!-- Logo -->
             <a class="flex items-center space-x-3" href="/">
               <div class="w-10 h-10 rounded-lg flex items-center justify-center">
-                <img src="app/Models/Network/assets/favicon.svg" alt="logo">
+                <img src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/assets/favicon.svg"
+                  alt="logo">
               </div>
               <span class="text-white text-2xl font-bold">Qwees_CorePro</span>
             </a>
@@ -560,7 +546,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-  <script src="/public/pages/main/assets/view.js"></script>
+  <script src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/assets/view.js"></script>
 
   <script>
     gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
@@ -572,8 +558,3 @@
       normalizeScroll: true
     });
   </script>
-</body>
-
-</html>
-
-</html>
