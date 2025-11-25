@@ -1,6 +1,21 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- icon favicon -->
-
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'super-dark': '#0A0A0A',
+          'super-gray': '#1A1A1A',
+          'super-light-gray': '#2A2A2A',
+          'super-green': '#00FF88',
+          'super-blue': '#00D4FF'
+        }
+      }
+    }
+  }
+</script>
 <!-- Font Awesome CDN for icon support -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
   crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -525,12 +540,12 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-<script src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/assets/view.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script defer src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/assets/view.js"></script>
 
-<script>
+<script defer>
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
   // create the smooth scroller FIRST!
