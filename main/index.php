@@ -1,7 +1,40 @@
+<!-- scripts -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollSmoother.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-<script src="https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/main/assets/js/main.js"></script>
+<script defer>
+  async function loadMainJS(url) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('404 или нет доступа');
+      const code = await res.text();
+
+      const script = document.createElement('script');
+      script.textContent = code;
+      document.head.appendChild(script);
+      console.log('QweesCore - Добро пожаловать!');
+    } catch (e) {
+      console.error('❌ Не удалось загрузить js страницы:', e);
+    }
+  }
+
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'super-dark': '#0A0A0A',
+          'super-gray': '#1A1A1A',
+          'super-light-gray': '#2A2A2A',
+          'super-green': '#00FF88',
+          'super-blue': '#00D4FF'
+        }
+      }
+    }
+  }
+
+  loadMainJS('https://raw.githubusercontent.com/timqwees/QweesCore/view/main/assets/js/main.js?' + Date.now());
+</script>
+<!-- styles -->
 <style>
   ::-webkit-scrollbar {
     width: 0;
@@ -69,7 +102,7 @@
     transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 </style>
-
+<!-- page code -->
 <div id="smooth-wrapper">
   <div id="smooth-content">
     <!-- Main Container -->
@@ -263,8 +296,8 @@
 
         <!-- Фоновое изображение -->
         <div class="absolute inset-0 -z-10 view">
-          <!-- <img src="https://i.pinimg.com/originals/39/b1/6b/39b16b66744a89df3e51cebfbfca8a3c.gif" alt="фон"
-            class="w-full h-full object-cover opacity-30 rotate-180"> -->
+          <img src="https://i.pinimg.com/originals/39/b1/6b/39b16b66744a89df3e51cebfbfca8a3c.gif" alt="фон"
+            class="w-full h-full object-cover opacity-50 rotate-180">
         </div>
 
         <div class="mx-auto relative view">
