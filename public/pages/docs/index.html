@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QweesCore Started</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+  <div id="page"></div>
+  <script async>
+    async function QwesCore(url, page = document.getElementById('page')) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Ошибка получения данных: ${response.status}`);
+      const veiw = await response.text();
+      page.innerHTML = veiw;
+      page.querySelectorAll('script').forEach(s => { const n = document.createElement('script'); Array.from(s.attributes).forEach(a => n.setAttribute(a.name, a.value)); n.textContent = s.textContent; s.replaceWith(n); });
+    }
+    QwesCore('https://raw.githubusercontent.com/timqwees/QweesCore/refs/heads/view/docs/index.php');
+  </script>
+</body>
+
+</html>

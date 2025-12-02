@@ -1,172 +1,231 @@
 <?php
-/**
- * 
- *  _____                                                                                _____ 
- * ( ___ )                                                                              ( ___ )
- *  |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   | 
- *  |   |                                                                                |   | 
- *  |   |                                                                                |   | 
- *  |   |    ________  ___       __   _______   _______   ________                       |   | 
- *  |   |   |\   __  \|\  \     |\  \|\  ___ \ |\  ___ \ |\   ____\                      |   | 
- *  |   |   \ \  \|\  \ \  \    \ \  \ \   __/|\ \   __/|\ \  \___|_                     |   | 
- *  |   |    \ \  \\\  \ \  \  __\ \  \ \  \_|/_\ \  \_|/_\ \_____  \                    |   | 
- *  |   |     \ \  \\\  \ \  \|\__\_\  \ \  \_|\ \ \  \_|\ \|____|\  \                   |   | 
- *  |   |      \ \_____  \ \____________\ \_______\ \_______\____\_\  \                  |   | 
- *  |   |       \|___| \__\|____________|\|_______|\|_______|\_________\                 |   | 
- *  |   |             \|__|                                 \|_________|                 |   | 
- *  |   |    ________  ________  ________  _______   ________  ________  ________        |   | 
- *  |   |   |\   ____\|\   __  \|\   __  \|\  ___ \ |\   __  \|\   __  \|\   __  \       |   | 
- *  |   |   \ \  \___|\ \  \|\  \ \  \|\  \ \   __/|\ \  \|\  \ \  \|\  \ \  \|\  \      |   | 
- *  |   |    \ \  \    \ \  \\\  \ \   _  _\ \  \_|/_\ \   ____\ \   _  _\ \  \\\  \     |   | 
- *  |   |     \ \  \____\ \  \\\  \ \  \\  \\ \  \_|\ \ \  \___|\ \  \\  \\ \  \\\  \    |   | 
- *  |   |      \ \_______\ \_______\ \__\\ _\\ \_______\ \__\    \ \__\\ _\\ \_______\   |   | 
- *  |   |       \|_______|\|_______|\|__|\|__|\|_______|\|__|     \|__|\|__|\|_______|   |   | 
- *  |   |                                                                                |   | 
- *  |   |                                                                                |   | 
- *  |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___| 
- * (_____)                                                                              (_____)
- * 
- * Эта программа является свободным программным обеспечением: вы можете распространять ее и/или модифицировать
- * в соответствии с условиями GNU General Public License, опубликованными
- * Фондом свободного программного обеспечения (Free Software Foundation), либо в версии 3 Лицензии, либо (по вашему выбору) в любой более поздней версии.
- *
- * @author TimQwees
- * @link https://github.com/TimQwees/Qwees_CorePro
- * 
- */
-
 namespace App\Models\Router;
 
 use App\Models\Network\Network;
+use Setting\Route\Function\Functions;
 
 class Routes extends Network
 {
- //### SETTING ROUTES ###
+  /**
+   * Регистрирует маршрут с указанным HTTP-методом, путем и обработчиком
+   *
+   * @param string $method HTTP-метод (например, 'GET', 'POST', 'PUT', 'DELETE')
+   * @param string $path Путь маршрута (например, '/user/{id}')
+   * @param callable|array|string $callback Обработчик маршрута: функция, массив [Класс, метод] или имя встроенной функции
+   *
+   * @return void
+   *
+   * @example self::addRoute('GET', '/user/{id}', [UserController::class, 'show']);
+   * @description Регистрирует маршрут GET /user/{id} с обработчиком UserController::show
+   *
+   * @example self::addRoute('POST', '/login', 'loginFunction');
+   * @description Регистрирует маршрут POST /login с обработчиком loginFunction
+   */
+  public static function addRoute(string $method, string $path, $callback): void
+  {
+    $method = strtoupper($method);
 
- private static $routes = [
-  'GET' => [],
-  'POST' => []
- ];
+    // Преобразуем плейсхолдеры в пути в именованные группы RegExp
+    // Примеры преобразования:
+    // "/user/{id}"         => "~^/user/(?P<id>[^/]+)$~"
+    // "/item={sku}/view"   => "~^/item=(?P<sku>[^/&?]+)/view$~"
 
- public function __construct()
- {
-  // echo '<script>console.log("TimQwees_CorePro - onEnable");</script>';
- }
+    // Сначала ищем ключ=значение с плейсхолдером: параметр в виде "item={sku}"
+    $path = preg_replace('~([a-zA-Z0-9_-]+)=\{([a-zA-Z0-9_]+)\}~', '$1=(?P<$2>[^/&?]+)', $path);
+    // Затем обычный плейсхолдер "{id}"
+    $pattern = preg_replace('~\{([a-zA-Z0-9_]+)\}~', '(?P<$1>[^/]+)', $path);
+    // Начало и конец строки, общая регулярка
+    $pattern = "~^" . $pattern . "$~";
 
-
-
- /**
-  * @param mixed $path
-  * @param mixed $callback
-  * @return [type]
-
-  * @example $this->get('/', 'on_Main');
-  * @description get запрос служит для получения данных / get request is need to get data
-  */
- public static function get($path, $callback)
- {
-  self::$routes['GET'][$path] = $callback;
- }
-
- /**
-  * @param mixed $path
-  * @param mixed $callback
-  * @return [type]
-  * 
-  * @example $this->post('/', 'on_Main');
-  * @description post запрос служит для отправки данных / post request is need to send data
-  */
- public static function post($path, $callback)
- {
-  self::$routes['POST'][$path] = $callback;
- }
-
- /**
-  * @return [type]
-  * 
-  * @example $this->dispatch();
-  * @description служит для запуска маршрутизации / it's need to turn on routing
-  */
- public static function dispatch()
- {
-  $method = $_SERVER['REQUEST_METHOD'];
-  $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-  // Удаляем /
-  $path = rtrim($path, '/');
-  if (empty($path)) {
-   $path = '/';
+    // вызов встроенных функций
+    if (is_string($callback) && method_exists(Functions::class, $callback)) {
+      Network::$patterns[$method][$pattern] = [Functions::class, $callback];
+      //вызов ручных функций
+    } elseif (is_callable($callback)) {
+      Network::$patterns[$method][$pattern] = $callback;
+      //вызов контроллеров
+    } elseif (is_array($callback) && isset($callback[0], $callback[1])) {
+      Network::$patterns[$method][$pattern] = [$callback[0], $callback[1]];
+    } else {
+      Network::handleInvalidCallback($path, $callback);
+    }
   }
 
-  if (isset(self::$routes[$method][$path])) {
-   $callback = self::$routes[$method][$path];
-
-   if (is_callable($callback)) {
-    return call_user_func($callback);
-   }
-
-   if (is_array($callback)) {
-    [$controller, $action] = $callback;
-    $controllerInstance = new $controller();
-    return $controllerInstance->$action();
-   }
+  /**
+   * Регистрирует маршрут GET с указанным путем и обработчиком
+   *
+   * @param string $path Путь маршрута (например, '/user/{id}')
+   * @param callable|array|string $callback Обработчик маршрута: функция, массив [Класс, метод] или имя встроенной функции
+   *
+   * @return void
+   *
+   * @example self::get('/user/{id}', [UserController::class, 'show']);
+   * @description Регистрирует маршрут GET /user/{id} с обработчиком UserController::show
+   *
+   * @example self::get('/login', 'loginFunction');
+   * @description Регистрирует маршрут GET /login с обработчиком loginFunction
+   */
+  public static function get(string $path, $callback): void
+  {
+    self::addRoute('GET', $path, $callback);
   }
 
-  // Если маршрут не найден, показываем 404
-  self::error_404($path);
- }
+  /**
+   * Регистрирует маршрут POST с указанным путем и обработчиком
+   *
+   * @param string $path Путь маршрута (например, '/user/{id}')
+   * @param callable|array|string $callback Обработчик маршрута: функция, массив [Класс, метод] или имя встроенной функции
+   *
+   * @return void
+   *
+   * @example self::post('/user/{id}', [UserController::class, 'update']);
+   * @description Регистрирует маршрут POST /user/{id} с обработчиком UserController::update
+   *
+   * @example self::post('/login', 'loginFunction');
+   * @description Регистрирует маршрут POST /login с обработчиком loginFunction
+   */
+  public static function post(string $path, $callback): void
+  {
+    self::addRoute('POST', $path, $callback);
+  }
 
- /** примеры использования get/post/dispatch
-  * 
-  * $this->get('/', 'on_Main'); - обрабатывает get запрос при переходе на главную страницу и вызывает функцию on_Main
-  * $this->post('/', 'on_Mainprogress'); - обрабатывает post запрос при отправке данных на главную страницу и вызывает функцию on_Mainprogress
-  * $this->dispatch(); - запускает маршрутизацию get и post запросов
-  */
+  /**
+   * Запускает процесс маршрутизации и обрабатывает входящий HTTP-запрос
+   *
+   * @return void
+   *
+   * @example self::dispatch();
+   * @description Запускает маршрутизатор, сопоставляет текущий URI и метод запроса с зарегистрированными маршрутами и вызывает соответствующий обработчик.
+   *
+   * Если маршрут найден, вызывается соответствующий контроллер или функция-обработчик с параметрами из URI.
+   * Если маршрут не найден, возвращается страница 404.
+   */
+  public static function dispatch(): void
+  {
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+    if ($uri === '') {
+      $uri = '/';
+    }
 
- //### ROUTES PAGE ###
+    $routes = Network::$patterns[$method] ?? [];
 
- public static function error_404(string $path)
- {
-  include dirname(__DIR__, 2) . '/Models/Router/view/404/404.html';
-  exit();
- }
+    foreach ($routes as $pattern => $callback) {
+      if (preg_match($pattern, $uri, $matches)) {
+        array_shift($matches);
 
- public static function on_Main()
- {
-  include dirname(__DIR__, 3) . '/public/pages/login/login.php';
-  exit();
- }
- public static function on_Login()
- {
-  include dirname(__DIR__, 3) . '/public/pages/login/login.php';
-  exit();
- }
- public static function on_Regist()
- {
-  include dirname(__DIR__, 3) . '/public/pages/regist/regist.php';
-  exit();
- }
- public static function on_Account()
- {
-  include dirname(__DIR__, 3) . '/public/pages/account/index.php';
-  exit();
- }
+        // Извлекаем именованные параметры
+        // Пример:
+        //   URI:            '/pay_send/100/VPN7/123456'
+        //   $matches:       [0=>'100', 1=>'VPN7', 2=>'123456']
+        //   $named_params:  ['param_function_1'=>'100', 'param_function_2'=>'VPN7', 'param_function_3'=>'123456']
+        $named_params = [];
+        foreach ($matches as $key => $value) {
+          if (is_string($key)) {
+            $named_params[$key] = $value;
+          }
+        }
 
- public static function on_Blogs()
- {
-  include dirname(__DIR__, 3) . '/public/pages/account/blogs.php';
-  exit();
- }
+        if (is_array($callback) && isset($callback[0], $callback[1])) {
+          // Контроллеры получают позиционные аргументы пути:
+          //   $controller->$action(...$matches)
+          // где порядок соответствует порядку плейсхолдеров в маршруте
+          $controllerClass = $callback[0];
+          $action = $callback[1];
 
- public static function on_Setting()
- {
-  include dirname(__DIR__, 3) . '/public/pages/account/setting.php';
-  exit();
- }
+          // Проверяем, является ли метод статическим
+          $reflection = new \ReflectionClass($controllerClass);
+          $isStatic = false;
+          if ($reflection->hasMethod($action)) {
+            $method = $reflection->getMethod($action);
+            $isStatic = $method->isStatic();
+          }
 
- public static function on_Logout()
- {
-  include dirname(__DIR__, 3) . '/public/pages/logout/logout.php';
-  exit();
- }
+          if ($isStatic) {
+            // Вызываем статический метод напрямую
+            if (method_exists($controllerClass, $action)) {
+              if (isset($callback[2])) {
+                $params_string = $callback[2];
+                $params = [];
+                if (!empty($params_string)) {
+                  $params_string = trim($params_string);
+                  if (preg_match('/^[\'"](.+)[\'"]$/', $params_string, $quote_matches)) {
+                    $params = [$quote_matches[1]];
+                  }
+                }
+                $controllerClass::$action(...$params);
+              } else {
+                $controllerClass::$action(...$matches);
+              }
+              return;
+            }
+          } else {
+            // Вызываем метод через экземпляр
+            $controller = is_string($controllerClass) ? new $controllerClass : $controllerClass;
+            if (method_exists($controller, $action)) {
+              // Если есть третий элемент (параметры для метода класса)
+              if (isset($callback[2])) {
+                $params_string = $callback[2];
+                $params = [];
+                if (!empty($params_string)) {
+                  $params_string = trim($params_string);
+                  if (preg_match('/^[\'"](.+)[\'"]$/', $params_string, $quote_matches)) {
+                    $params = [$quote_matches[1]];
+                  }
+                }
+                $controller->$action(...$params);
+              } else {
+                $controller->$action(...$matches);
+              }
+              return;
+            }
+          }
+        } elseif (is_callable($callback)) {
+          // Замыкания/функции получают именованные параметры по ключам
+          // Пример вызова для URI выше: function ($amount, $description, $telegram_id)
+          //   call_user_func_array($callback, ['amount'=>'100','description'=>'VPN7','telegram_id'=>'123456'])
+          call_user_func_array($callback, $named_params);
+          return;
+        }
+        Network::handleInvalidCallback($uri, $callback);
+        return;
+      }
+    }
+
+    // Если маршрут не найден, показываем 404
+    self::error_404($uri);
+  }
+
+  /**
+   * Страница 404
+   */
+
+  public static function error_404(
+    string $path
+  ) {
+    $link = dirname(__DIR__, 2) . '/Models/Router/view/404/404.html';
+    if (file_exists($link)) {
+      include_once $link;
+    }
+  }
+
+  /**
+   * Автоматически подключает и отображает элемент по указанному пути
+   *
+   * @param string $path Путь к файлу, который необходимо подключить
+   * @return void
+   *
+   * @example self::auto_element('/path/to/file.php');
+   * @description Подключает файл по указанному пути, если он существует, иначе вызывает страницу 404
+   */
+  public static function auto_element($path)
+  {
+    if (file_exists($path)) {
+      include_once $path;
+    } else {
+      self::error_404(__METHOD__);
+    }
+  }
+
 }
+include_once dirname(__DIR__, 3) . '/setting/route/function/functions.php';

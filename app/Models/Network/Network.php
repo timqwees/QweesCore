@@ -1,431 +1,603 @@
 <?php
 /**
- * 
- *  _____                                                                                _____ 
+ *
+ *  _____                                                                                _____
  * ( ___ )                                                                              ( ___ )
- *  |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   | 
- *  |   |                                                                                |   | 
- *  |   |                                                                                |   | 
- *  |   |    ________  ___       __   _______   _______   ________                       |   | 
- *  |   |   |\   __  \|\  \     |\  \|\  ___ \ |\  ___ \ |\   ____\                      |   | 
- *  |   |   \ \  \|\  \ \  \    \ \  \ \   __/|\ \   __/|\ \  \___|_                     |   | 
- *  |   |    \ \  \\\  \ \  \  __\ \  \ \  \_|/_\ \  \_|/_\ \_____  \                    |   | 
- *  |   |     \ \  \\\  \ \  \|\__\_\  \ \  \_|\ \ \  \_|\ \|____|\  \                   |   | 
- *  |   |      \ \_____  \ \____________\ \_______\ \_______\____\_\  \                  |   | 
- *  |   |       \|___| \__\|____________|\|_______|\|_______|\_________\                 |   | 
- *  |   |             \|__|                                 \|_________|                 |   | 
- *  |   |    ________  ________  ________  _______   ________  ________  ________        |   | 
- *  |   |   |\   ____\|\   __  \|\   __  \|\  ___ \ |\   __  \|\   __  \|\   __  \       |   | 
- *  |   |   \ \  \___|\ \  \|\  \ \  \|\  \ \   __/|\ \  \|\  \ \  \|\  \ \  \|\  \      |   | 
- *  |   |    \ \  \    \ \  \\\  \ \   _  _\ \  \_|/_\ \   ____\ \   _  _\ \  \\\  \     |   | 
- *  |   |     \ \  \____\ \  \\\  \ \  \\  \\ \  \_|\ \ \  \___|\ \  \\  \\ \  \\\  \    |   | 
- *  |   |      \ \_______\ \_______\ \__\\ _\\ \_______\ \__\    \ \__\\ _\\ \_______\   |   | 
- *  |   |       \|_______|\|_______|\|__|\|__|\|_______|\|__|     \|__|\|__|\|_______|   |   | 
- *  |   |                                                                                |   | 
- *  |   |                                                                                |   | 
- *  |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___| 
+ *  |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   |
+ *  |   |                                                                                |   |
+ *  |   |                                                                                |   |
+ *  |   |    ________  ___       __   _______   _______   ________                       |   |
+ *  |   |   |\   __  \|\  \     |\  \|\  ___ \ |\  ___ \ |\   ____\                      |   |
+ *  |   |   \ \  \|\  \ \  \    \ \  \ \   __/|\ \   __/|\ \  \___|_                     |   |
+ *  |   |    \ \  \\\  \ \  \  __\ \  \ \  \_|/_\ \  \_|/_\ \_____  \                    |   |
+ *  |   |     \ \  \\\  \ \  \|\__\_\  \ \  \_|\ \ \  \_|\ \|____|\  \                   |   |
+ *  |   |      \ \_____  \ \____________\ \_______\ \_______\____\_\  \                  |   |
+ *  |   |       \|___| \__\|____________|\|_______|\|_______|\_________\                 |   |
+ *  |   |             \|__|                                 \|_________|                 |   |
+ *  |   |    ________  ________  ________  _______   ________  ________  ________        |   |
+ *  |   |   |\   ____\|\   __  \|\   __  \|\  ___ \ |\   __  \|\   __  \|\   __  \       |   |
+ *  |   |   \ \  \___|\ \  \|\  \ \  \|\  \ \   __/|\ \  \|\  \ \  \|\  \ \  \|\  \      |   |
+ *  |   |    \ \  \    \ \  \\\  \ \   _  _\ \  \_|/_\ \   ____\ \   _  _\ \  \\\  \     |   |
+ *  |   |     \ \  \____\ \  \\\  \ \  \\  \\ \  \_|\ \ \  \___|\ \  \\  \\ \  \\\  \    |   |
+ *  |   |      \ \_______\ \_______\ \__\\ _\\ \_______\ \__\    \ \__\\ _\\ \_______\   |   |
+ *  |   |       \|_______|\|_______|\|__|\|__|\|_______|\|__|     \|__|\|__|\|_______|   |   |
+ *  |   |                                                                                |   |
+ *  |   |                                                                                |   |
+ *  |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___|
  * (_____)                                                                              (_____)
- * 
+ *
  * Эта программа является свободным программным обеспечением: вы можете распространять ее и/или модифицировать
  * в соответствии с условиями GNU General Public License, опубликованными
  * Фондом свободного программного обеспечения (Free Software Foundation), либо в версии 3 Лицензии, либо (по вашему выбору) в любой более поздней версии.
  *
+ *
+ * @license GPL-3.0-or-later (см. файл LICENSE.txt)
  * @author TimQwees
  * @link https://github.com/TimQwees/Qwees_CorePro
- * 
+ *
+ *
  */
 
 namespace App\Models\Network;
 
-use App\Config\Database;
+use App\Config\{Database, Session};
 use App\Models\Router\Routes;
-use App\Config\Session;
 use App\Models\Network\Message;
-use App\Controllers\Structure;
+use PHPMailer\PHPMailer\PHPMailer;
+
 class Network extends Session
 {
-    private static $db;
+  public static $db;
 
-    //### PATTERNS ROUTER PAGE ###
-    private static $patterns = [
-        '~^$~' => [Routes::class, 'on_Main'],       // https://exemple.com/
-        '~^search/login$~' => [Routes::class, 'on_Login'], // https://exemple.com/search/login
-        '~^search/regist$~' => [Routes::class, 'on_Regist'], // https://exemple.com/search/regist
-        '~^search/account$~' => [Routes::class, 'on_Account'], // https://exemple.com/search/account
-        '~^search/account/blogs$~' => [Routes::class, 'on_Blogs'], // https://exemple.com/search/account/blogs
-        '~^search/account/setting$~' => [Routes::class, 'on_Setting'], // https://exemple.com/search/account/setting
-        '~^search/logout$~' => [Routes::class, 'on_Logout'], // https://exemple.com/search/logout
-    ];
+  ### PATTERNS ROUTER PAGE ###
+  public static array $patterns = [
+    'GET' => [],
+    'POST' => []
+  ];
 
-    //### REQUEST FUNCTION IN DATABASE ###
-    public $QuaryRequest__Article = [];//array
-    public $QuaryRequest__User = [];//array
-    public $QuaryRequest__Auth = [];//array
+  public function __construct()
+  {
+    Session::init();
+    self::$db = Database::getConnection();
+  }
 
-    //### LIST TABLES INT0 DATABASE ###
-    public static $table_users = 'users_php';
-    public static $table_articles = 'articles';
-
-    //### PUBLIC PATH ###
-    public static $paths = [
-        'login' => 'search/login',
-        'regist' => 'search/regist',
-        'account' => 'search/account',
-        'logout' => 'search/logout',
-    ];
-
-    public function __construct()
-    {
-        Session::init();
-        self::$db = Database::getConnection();
-        self::onTableCheck(self::$table_users);
-        self::onTableCheck(self::$table_articles);
-        $this->preparerRequestArticle();
-        $this->preparerRequestUser();
-        $this->preparerRequestAuth();
+  /**
+   * Проверяет и инициализирует все таблицы, определённые в файле схемы базы данных (schema.sql).
+   *
+   * Если какой-либо таблицы не существует — создаёт её на основе схемы.
+   * Используется для автоматической инициализации структуры базы данных при запуске приложения.
+   *
+   * @return void
+   *
+   * @example Network::onTableAllExists();
+   * @description Проверяет наличие всех таблиц из схемы и создаёт отсутствующие / Checks all tables from schema and creates missing ones
+   */
+  public static function onTableAllExists()
+  {
+    $schemaFile = Database::$schema_name;
+    if (!file_exists($schemaFile)) {
+      Message::set('error', "Файл схемы не найден: $schemaFile");
+      return;
+    }
+    $schema = file_get_contents($schemaFile);
+    if ($schema === false || trim($schema) === '') {
+      Message::set('error', "Схема пуста или не может быть прочитана: $schemaFile");
+      return;
     }
 
-    /**
-     * @param string $type
-     * 
-     * @return [type]
-     * 
-     * @example $this->onTableCheck('Имя таблицы')
-     * @description автопроверка на существование таблицы и автосоздание несущетвующей / auto-checking for the existence of a table and auto-creating a nonessential one
-     * 
-     */
-    public static function onTableCheck(string $type)
-    {
-        try {
-            switch (strtolower($type)) {
-                case 'users':
-                case 'user':
-                case 'users_php':
-                    if (!self::onTableExists(self::$table_users)) {//false
+    $tables = [];
+    if (preg_match_all('/CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+([`"]?)([a-zA-Z0-9_]+)\1/i', $schema, $matches)) {
+      $tables = $matches[2];
 
-                        $sql = "CREATE TABLE IF NOT EXISTS `" . self::$table_users . "` (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        mail varchar(50) NOT NULL,
-                        username varchar(50) NOT NULL,
-                        password varchar(255) NOT NULL,
-                        `group` varchar(50) NOT NULL,
-                        session VARCHAR(255) NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-                        self::$db->exec($sql);
-                    }
-                    break;
+      foreach ($tables as $table) {
+        if (!self::onTableExists($table)) {
+          try {
+            $pattern = '/CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+[`"]?' . preg_quote($table, '/') . '[`"]?\s*\((.*?)\);/is';
+            if (preg_match($pattern, $schema, $tableMatch)) {
+              $createSql = "CREATE TABLE IF NOT EXISTS `$table` (" . trim($tableMatch[1]) . ");";
 
-                case 'articles':
-                case 'article':
-                case 'art':
-                case 'poster':
-                case 'post':
-                    if (!self::onTableExists(self::$table_articles)) {//false
+              // Преобразуем SQLite синтаксис в MySQL синтаксис для MySQL
+              $db_selection = $_ENV['DATABASE'] ?? getenv('DATABASE') ?? 'mysql';
+              if ($db_selection === 'mysql') {
+                $createSql = preg_replace('/INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT/i', 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY', $createSql);
+              }
 
-                        $sql = "CREATE TABLE IF NOT EXISTS `" . self::$table_articles . "` (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        title VARCHAR(255) NOT NULL,
-                        content TEXT NOT NULL,
-                        user_id INT NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (user_id) REFERENCES users_php(id)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-                        self::$db->exec($sql);
-                    }
-                    break;
-
-                default:
-                    if (!self::onTableExists($type)) {//false
-
-                        $sql = "CREATE TABLE IF NOT EXISTS `" . $type . "` (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-                        message::set('error', "Таблица '$type' не найдена в системе после попытки создания.\nБыла создана базовая таблица с названием '$type'");
-                        self::$db->exec($sql);
-                    }
-                    return false;
-            }
-
-            if (!self::onTableExists($type)) {//false
-                message::set('error', "Таблица '$type' не зарегистрирована");
-                return false;
-            }
-
-            return true;
-
-        } catch (\PDOException $e) {
-            message::set('error', "Ошибка PDO при проверке/создании таблицы '$type': " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * @param string $tableName
-     * @return bool
-     * 
-     * @example $this->onTableCheck('Имя таблицы')
-     * @description автопроверка на существование таблицы и автосоздание несущетвующей / auto-checking for the existence of a table and auto-creating a nonessential one
-     * 
-     */
-    private static function onTableExists(string $tableName)
-    {
-        try {
-            $stmt = self::$db->query("SHOW TABLES LIKE '$tableName'");
-            return $stmt->rowCount() > 0;//true существует or false несуществует
-        } catch (\PDOException $e) {
-            message::set('error', "Ошибка при проверке существования таблицы '$tableName': " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * @param string $columnName
-     * @param string $tableName
-     * @return [type]
-     * 
-     * @example $this->onColumnExists('Имя колонки', 'Имя таблицы');
-     * @description автопроверка на существование колонок в таблице и автосоздание колонки / auto-checking coluns in table and auto-creating column if have not
-     * 
-     */
-    public static function onColumnExists(string $columnName, string $tableName)
-    {
-        try {
-            $stmt = self::$db->query("SHOW COLUMNS FROM " . $tableName . " LIKE '$columnName'");
-
-            if ($stmt->rowCount() === 0) {
-                $sql = "ALTER TABLE " . $tableName . " ADD COLUMN `$columnName` VARCHAR(255)";
-                self::$db->exec($sql);
-                message::set('error', "Создание новой колонки '$columnName' в таблице '$tableName'");
-            }
-
-            return true;
-        } catch (\PDOException $e) {
-            message::set('error', "Ошибка при проверке/создании колонки '$columnName' в таблице '$tableName': " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Summary of onRedirect
-     * @param string $path
-     * @throws \Exception
-     * @return bool
-     * 
-     * @example $this->onRedirect('Путь начиная с корневой директории');
-     * @description переадресация к страницам / redirect to page in workspace
-     * 
-     */
-    public static function onRedirect(string $path)
-    {
-        try {
-            if (empty($path)) {
-                throw new \Exception("Путь для перенаправления не может быть пустым");
-            }
-
-            // Убираем дублирование search в пути
-            $path = preg_replace('#^/search/search/#', '/search/', $path);
-            $path = preg_replace('#^search/search/#', 'search/', $path);
-
-            // Проверяем на бесконечные редиректы
-            if ($_SERVER['REQUEST_URI'] === $path) {
-                throw new \Exception("Обнаружен циклический редирект на: " . $path);
-            }
-
-            // Добавляем слеш в начало, если его нет
-            if (strpos($path, '/') !== 0) {
-                $path = '/' . $path;
-            }
-
-            if (ob_get_level()) {
-                ob_end_clean(); // чистим буфер вывода
-            }
-
-            if (headers_sent($file, $line)) {
-                throw new \Exception("Заголовки уже были отправлены в файле $file на строке $line");
-            }
-
-            header("Location: " . $path, true, 302);
-            exit();
-
-        } catch (\Exception $e) {
-            message::set('error', "Ошибка при перенаправлении: " . $e->getMessage());
-
-            if (!headers_sent()) {
-                header("HTTP/1.1 500 Internal Server Error");
-                echo "Произошла внутренняя ошибка. Пожалуйста, проверьте ваше интернет соединение!";
-                exit();
+              Database::send($createSql);
+              Message::set('info', "Создана таблица '$table' по схеме.");
             } else {
-                return false;
+              Message::set('error', "Не удалось найти SQL для создания таблицы '$table' в " . Database::$schema_name);
             }
+          } catch (\PDOException $e) {
+            Message::set('error', "Ошибка при создании таблицы '$table': " . $e->getMessage());
+          }
         }
+      }
+    }
+  }
+
+  /**
+   * Проверяет существование таблицы в базе данных.
+   *
+   * Используется для автоматической проверки наличия таблицы перед выполнением операций с ней.
+   * Возвращает true, если таблица существует, иначе false.
+   *
+   * @param string $tableName Имя таблицы для проверки.
+   * @return bool
+   *
+   * @example Network::onTableExists('users');
+   * @description Проверяет, существует ли таблица с указанным именем / Checks if a table with the given name exists
+   */
+  private static function onTableExists(string $tableName)
+  {
+    try {
+      $db_selection = $_ENV['DATABASE'] ?? getenv('DATABASE') ?? 'mysql';
+      if ($db_selection === 'sqlite') {
+        $sql = "SELECT name FROM sqlite_master WHERE type='table' AND name=?";
+        $params = [$tableName];
+        $result = Database::send($sql, $params);
+        return is_array($result) && count($result) > 0;
+      } else {
+        // MySQL
+        $sql = "SHOW TABLES LIKE ?";
+        $params = [$tableName];
+        $result = Database::send($sql, $params);
+        return is_array($result) && count($result) > 0;
+      }
+    } catch (\PDOException $e) {
+      Message::set('error', "Ошибка при проверке существования таблицы '$tableName': " . $e->getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * @param string $columnName
+   * @param string $tableName
+   * @return [type]
+   *
+   * @example $this->onColumnExists('Имя колонки', 'Имя таблицы');
+   * @description автопроверка на существование колонок в таблице и автосоздание колонки / auto-checking coluns in table and auto-creating column if have not
+   *
+   */
+  public static function onColumnExists(string $columnName, string $tableName)
+  {
+    try {
+      $db_selection = $_ENV['DATABASE'] ?? getenv('DATABASE') ?? 'mysql';
+
+      // Проверяем, существует ли колонка в таблице
+      $columnExists = false;
+
+      if ($db_selection === 'sqlite') {
+        $sql = "PRAGMA table_info($tableName)";
+        $columns = Database::send($sql);
+        if (is_array($columns)) {
+          foreach ($columns as $column) {
+            if (isset($column['name']) && $column['name'] === $columnName) {
+              $columnExists = true;
+              break;
+            }
+          }
+        }
+      } else {
+        // MySQL
+        $sql = "SHOW COLUMNS FROM `$tableName` LIKE ?";
+        $columns = Database::send($sql, [$columnName]);
+        if (is_array($columns) && count($columns) > 0) {
+          $columnExists = true;
+        }
+      }
+
+      // Если не существует, пытаемся добавить колонку
+      if (!$columnExists) {
+        $addColumnSql = ($db_selection === 'sqlite')
+          ? "ALTER TABLE \"$tableName\" ADD COLUMN \"$columnName\" TEXT"
+          : "ALTER TABLE `$tableName` ADD COLUMN `$columnName` VARCHAR(255)";
+        Database::send($addColumnSql);
+        Message::set('error', "Создание новой колонки '$columnName' в таблице '$tableName'");
+      }
+
+      return true;
+    } catch (\Throwable $e) {
+      Message::set('error', "Ошибка при проверке/создании колонки '$columnName' в таблице '$tableName': " . $e->getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * Выполняет перенаправление пользователя на указанный путь
+   *
+   * @param string $path Путь для перенаправления (относительно корня сайта)
+   * @throws \Exception В случае ошибки при перенаправлении
+   * @return bool false в случае ошибки, завершает выполнение скрипта при успешном редиректе
+   *
+   * @example Network::onRedirect('/profile');
+   * @description Перенаправляет пользователя на указанный путь / Redirects user to the specified path
+   */
+  public static function onRedirect(string $path)
+  {
+    try {
+      if (empty($path)) {
+        throw new \Exception("Путь для перенаправления не может быть пустым");
+      }
+
+      // Убираем дублирование search в пути
+      $path = preg_replace('#^/search/search/#', '/search/', $path);
+      $path = preg_replace('#^search/search/#', 'search/', $path);
+
+      // Проверяем на бесконечные редиректы (только для GET запросов)
+      // После POST запроса редирект на ту же страницу допустим
+      $currentUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+      $normalizedPath = parse_url($path, PHP_URL_PATH) ?? $path;
+
+      // Нормализуем пути (убираем лишние слэши)
+      $currentUri = preg_replace('#/+#', '/', rtrim($currentUri, '/')) ?: '/';
+      $normalizedPath = preg_replace('#/+#', '/', rtrim($normalizedPath, '/')) ?: '/';
+
+      // Проверяем только для GET запросов, чтобы разрешить POST -> GET редиректы
+      if ($_SERVER['REQUEST_METHOD'] === 'GET' && $currentUri === $normalizedPath) {
+        throw new \Exception("Обнаружен циклический редирект на: " . $path);
+      }
+
+      // Добавляем слеш в начало, если его нет
+      if (strpos($path, '/') !== 0) {
+        $path = '/' . $path;
+      }
+
+      if (ob_get_level()) {
+        ob_end_clean(); // чистим буфер вывода
+      }
+
+      if (headers_sent($file, $line)) {
+        throw new \Exception("Заголовки уже были отправлены в файле $file на строке $line");
+      }
+
+      header("Location: " . $path, true, 302);
+      exit();
+
+    } catch (\Exception $e) {
+      Message::set('error', "Ошибка при перенаправлении: " . $e->getMessage());
+
+      if (!headers_sent()) {
+        header("HTTP/1.1 500 Internal Server Error");
+        echo "Произошла внутренняя ошибка. Пожалуйста, проверьте ваше интернет соединение!";
+        exit();
+      } else {
+        return false;
+      }
+    }
+  }
+
+  /**
+   * Запускает маршрутизацию на сайте
+   *
+   * @return void
+   *
+   * @example Network::onRoute();
+   * @description служит для запуска маршрутизации на сайте / starts routing on the site
+   */
+  public static function onRoute()
+  {
+    self::onAutoloadRegister();
+    Database::getConnection();
+    // Определяем HTTP-метод
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+    // Получаем текущий маршрут из .htaccess или REQUEST_URI
+    if (isset($_GET['route'])) {
+      $route = trim($_GET['route']);
+      // Убираем все ведущие и конечные слэши, затем добавляем ровно один ведущий слэш
+      $route = '/' . ltrim($route, '/');
+      // Если после обработки $route стал пустым (например, был только слэш), делаем его "/"
+      if ($route === '/') {
+        // ничего не делаем, уже "/"
+      } elseif ($route === '//') {
+        $route = '/';
+      }
+    } else {
+      $route = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+      // Убираем дублирующиеся слэши (например, // -> /)
+      $route = preg_replace('#/+#', '/', $route);
+      if ($route === '') {
+        $route = '/';
+      }
     }
 
-    /**
-     * 
-     * @example $this->onRoute();
-     * @description служит для запуска маршрутизации на сайте / it's need to turn on routing on the site
-     * 
-     */
-    public function onRoute()
-    {
-        self::onAutoloadRegister();
+    // Убираем дублирующиеся слэши в любом случае (например, // -> /)
+    $route = preg_replace('#/+#', '/', $route);
 
-        // Получаем текущий маршрут из .htaccess
-        if (isset($_GET['route'])) {
-            $route = trim($_GET['route'], '/');
-        } else {
-            $route = trim($_SERVER['REQUEST_URI'], '/');
-        }
-        $findRoute = false;
+    $findRoute = false;
 
-        foreach (self::$patterns as $pattern => $controllerAndAction) {
-            if (preg_match($pattern, $route, $matches)) {
-                $findRoute = true; // для выхода из цикла и подтверждения что маршрут найден
-                unset($matches[0]);// удаляет первый элемент массива
-                $action = $controllerAndAction[1]; // sayHello
-                $controller = new $controllerAndAction[0];// App\Models\Page\Window
-                $controller->$action(...$matches);
-                break;
-            }
-        }
-        if (!$findRoute) {
-            header("HTTP/1.1 404 Страница не найдена");
-            (new Routes())->error_404('/' . $route);
-            exit();
-        }
+    // Порядок методов для поиска маршрута: текущий, затем безопасные фолбэки
+    $candidateMethods = [$method];
+    if ($method === 'POST') {
+      $candidateMethods[] = 'GET';
+    } elseif ($method === 'HEAD') {
+      $candidateMethods[] = 'GET';
     }
 
+    foreach ($candidateMethods as $candidateMethod) {
+      $routes = self::$patterns[$candidateMethod] ?? [];
+      foreach ($routes as $pattern => $callback) {
+        if (preg_match($pattern, $route, $matches)) {
+          $findRoute = true;
+          array_shift($matches); // убираем полный путь
 
-    /**
-     * @return [type]
-     * 
-     * @example $this->onAutoloadRegister();
-     * @description служит для загрузки классов / it's need to load classes
-     * 
-     */
-    public static function onAutoloadRegister(
-    ): void {
-        spl_autoload_register(function ($className) {
-
-            $filePath = dirname(__DIR__) . '/' . str_replace(['\\', 'App\Models'], ['/', ''], $className) . '.php';
-
-            if (file_exists($filePath)) {//have't file
-                require_once $filePath;
+          if (is_array($callback) && isset($callback[0], $callback[1]) && class_exists($callback[0])) {
+            $controller = new $callback[0];
+            $action = $callback[1];
+            if (method_exists($controller, $action)) {
+              $controller->$action(...$matches);
             } else {
-                message::set('error', "Ошибка загрузки класса '$className'. Файл не существует по пути: $filePath");
+              self::handleInvalidCallback($route, $callback);
             }
-        });
+          } elseif (is_callable($callback)) {
+            // Извлекаем именованные параметры для callables (совместимо с {param} в пути)
+            $named_params = [];
+            foreach ($matches as $key => $value) {
+              if (is_string($key)) {
+                $named_params[$key] = $value;
+              }
+            }
+            call_user_func_array($callback, array_values($named_params));
+          } else {
+            self::handleInvalidCallback($route, $callback);
+          }
+
+          break 2; // найден маршрут, выходим из обоих циклов
+        }
+      }
     }
 
-    /**
-     * onMail
-     *
-     * @param string $to_mail
-     * @param string $subject
-     * @param string $body
-     * 
-     * @return [type]
-     * 
-     * @example $this->onMail('example@example.com', 'Тема письма', 'Содержание письма');
-     * @description служит для отправки письма / it's need to send email
-     * 
-     */
-    public function onMail(string $to_mail, string $subject, string $body)
-    {
-        if (empty($to_mail)) {
-            message::set('error', "Пустой email получателя!");
-            return false;
-        } elseif (empty($subject)) {
-            message::set('error', "Пустая тема письма!");
-            return false;
-        } elseif (empty($body)) {
-            message::set('error', "Пустое содержание письма!");
-            return false;
-        }
+    if (!$findRoute) {
+      header("HTTP/1.1 404 Страница не найдена");
+      (new Routes())->error_404($route);
+      exit();
+    }
+  }
 
-        $mailer = [
-            "email" => "bingiabonbasv@gmail.com",//Отправитель 0
-            "pass" => "tlps uzrg imnf cekl",//Пароль для внешних приложений 1
-            "name" => "bingiabonbasv@gmail.com",//name 2
-            "subject" => $subject,//subject 3
-            "body" => $body,//Мessage 4
-            "to_email" => $to_mail,//Получатель 5
-            "port" => 587,//порт 6
-        ];
+  /**
+   * Регистрирует автозагрузчик классов для приложения
+   *
+   * @return void
+   *
+   * @example Network::onAutoloadRegister();
+   * @description Регистрирует функцию автозагрузки классов, чтобы автоматически подключать файлы классов при их использовании / Registers an autoloader function to automatically include class files when they are used
+   */
+  public static function onAutoloadRegister(): void
+  {
+    spl_autoload_register(function ($className) {
 
-        try {
-            (new Structure())->onPHPMailer($mailer);//send
-            return true;
-        } catch (\Exception $e) {
-            message::set('error', "Ошибка отправки письма: " . $e->getMessage());
-            return false;
-        }
+      $filePath = dirname(__DIR__) . '/' . str_replace(['\\', 'App\Models'], ['/', ''], $className) . '.php';
+
+      if (file_exists($filePath)) {//have't file
+        require_once $filePath;
+      } else {
+        Message::set('error', "Ошибка загрузки класса '$className'. Файл не существует по пути: $filePath");
+      }
+    });
+  }
+
+  /**
+   * Отправляет электронное письмо с помощью PHPMailer
+   *
+   * @param array $data Ассоциативный массив с параметрами письма:
+   *  - 'to_email' (string): адрес получателя
+   *  - 'subject' (string): тема письма
+   *  - 'body' (string): HTML-содержимое письма
+   *
+   * @return bool true в случае успешной отправки, false в случае ошибки
+   *
+   * @example $this->onPHPMailer([
+   *     'to_email' => 'user@example.com',
+   *     'subject' => 'Тема письма',
+   *     'body' => '<b>Привет!</b> Это тестовое письмо.'
+   * ]);
+   * @description Отправляет письмо на указанный email с заданной темой и содержимым / Send email to specified address with subject and body
+   */
+  public function onPHPMailer(array $data)
+  {
+
+    try {
+      $mail = new PHPMailer();
+      $mail->CharSet = 'UTF-8';
+
+      $mail->isSMTP();
+      $mail->SMTPAuth = true;
+      $mail->SMTPDebug = 0;
+
+      $mail->Host = 'smtp.gmail.com';
+      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; //TLS
+
+      $mail->Port = $_ENV['EMAIL_PORT'] ?: '';
+      $mail->Username = $_ENV['EMAIL'] ?: '';
+      $mail->Password = $_ENV['EMAIL_PASSWORD'] ?: '';
+      $mail->setFrom($_ENV['EMAIL'] ?: '', $_ENV['EMAIL_NICKNAME'] ?: '');
+      $mail->addAddress($data['to_email']);
+      $mail->Subject = $data['subject'];
+
+      $mail->msgHTML($data['body']);
+
+      // Прикрепить файл
+      //$mail->addAttachment('path_to_file.jpg');
+
+      //Отправка
+      $mail->send();
+      $mail->clearAddresses();
+
+      return true;
+    } catch (\Exception $e) {
+      Message::set('error', 'Ошибка при отправке письма: ' . $e->getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * Обрабатывает вызов неизвестного метода (callback) для маршрута
+   *
+   * @param string $path Путь маршрута, при котором произошла ошибка
+   * @param mixed $callback Callback, который не найден или не может быть вызван
+   *
+   * @return void
+   *
+   * @example Network::handleInvalidCallback('/profile', 'UserController@show');
+   * @description Показывает страницу ошибки при попытке вызвать неизвестный метод для маршрута / Show error page when trying to call unknown method for route
+   */
+  public static function handleInvalidCallback(string $path, $callback): void
+  {
+    $callbackType = is_object($callback) ? get_class($callback) : gettype($callback);
+    $callbackName = is_string($callback) ? $callback : $callbackType;
+
+    http_response_code(500);
+
+    ob_start(); ?>
+    <!DOCTYPE html>
+    <html lang='en'>
+
+    <head>
+      <meta charset='UTF-8'>
+      <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+      <title>Call to unknown method: <?= htmlspecialchars($callbackName) ?></title>
+      <script src='https://cdn.tailwindcss.com'></script>
+    </head>
+
+    <body class='flex items-center justify-center h-[100dvh]'>
+
+      <div class='container mx-auto w-full p-10 flex flex-col items-center justify-center'>
+
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center">
+            <img src="app/Models/Network/assets/logo.png" alt="logo">
+          </div>
+          <span class="text-black text-2xl font-bold">Qwees_CorePro</span>
+        </div>
+
+        <div class='text-9xl font-bold text-red-500'>ERROR</div>
+        <div class='text-6xl font-bold text-red-700'>UNKNOWN METHOD!</div>
+        <!-- <div class='text-xl font-medium text-red-500 mt-4 opacity-70'>Call to unknown method: <span
+                        class='bg-red-200 px-2'> <? echo htmlspecialchars($callbackName); ?></span>
+                </div> -->
+
+        <div class='bg-black rounded-lg p-4 text-sm font-mono relative mt-4'>
+          <div class='flex gap-1 mb-2'>
+            <span class='w-2 h-2 bg-red-400 rounded-full'></span>
+            <span class='w-2 h-2 bg-yellow-400 rounded-full'></span>
+            <span class='w-2 h-2 bg-green-400 rounded-full'></span>
+          </div>
+          <div class='text-gray-400 mb-2'>// Вызываеться неизвестный метод при вызове:</div>
+          <div class='text-white'>
+            <span class='text-blue-400'>Routes</span><span class='text-blue-300'>::</span><span
+              class='text-indigo-400'>addRoutes</span><span class='text-yellow-300'>(</span><span
+              class='text-red-300'>'</span><span class='text-green-300'><?= htmlspecialchars(
+                $path
+              ) ?></span><span class='text-red-300'>'</span>,
+            <span class='text-red-300'>'</span><span
+              class='bg-red-400 px-2'><?= htmlspecialchars($callbackName) ?></span><span class='text-red-300'>'</span><span
+              class='text-yellow-300'>)</span>;
+          </div>
+        </div>
+      </div>
+    </body>
+
+    </html>
+    <?php
+    echo ob_get_clean();
+    exit;
+  }
+
+  /**
+   * Автоматический вывод деталей проблем/логов для диагностики
+   *
+   * Выводит информацию об ошибках в удобном формате, включая детали из базы данных
+   *
+   * @param array $debug_info Массив строк с информацией для отладки
+   * @param mixed $db_error Детали ошибки из базы данных (глобальная переменная $DB_ERROR_INFO)
+   * @param string $title Заголовок блока диагностики
+   * @param bool $as_json Также вывести как JSON (для API ответов)
+   * @return void
+   */
+  public static function debugOutput(array $debug_info = [], $db_error = null, string $title = 'Диагностика проблемы', bool $as_json = true)
+  {
+    global $DB_ERROR_INFO;
+
+    // Если db_error не передан, пытаемся получить из глобальной переменной
+    if ($db_error === null && isset($DB_ERROR_INFO)) {
+      $db_error = $DB_ERROR_INFO;
     }
 
-    /**
-     * @return [type]
-     * 
-     * @example $this->preparerRequestArticle();
-     * @description служит для подготовки запросов к базе данных / it's need to prepare requests to the database
-     * 
-     */
-    public function preparerRequestArticle()
-    {
-        if (empty($this->QuaryRequest__Article)) {
-            $this->QuaryRequest__Article = [
-                'addArticle' => self::$db->prepare("INSERT INTO " . self::$table_articles . " (title, content, user_id, created_at) VALUES (?, ?, ?, NOW())"),
-                'removeArticle' => self::$db->prepare("DELETE FROM " . self::$table_articles . " WHERE id = ? AND user_id = ?"),
-                'getArticleAll' => self::$db->prepare("SELECT art.*, user.username FROM " . self::$table_articles . " art JOIN users_php user ON art.user_id = user.id ORDER BY art.created_at DESC"),
-                'getAllArticleById' => self::$db->prepare("SELECT art.*, user.username FROM " . self::$table_articles . " art JOIN users_php user ON art.user_id = user.id WHERE art.user_id = ?"),
-                'getListMyArticle' => self::$db->prepare("SELECT art.*, user.username FROM " . self::$table_articles . " art JOIN users_php user ON art.user_id = user.id WHERE user.id = ? ORDER BY art.created_at DESC"),
-                'getMyArticle' => self::$db->prepare("SELECT art.*, user.username FROM " . self::$table_articles . " art JOIN users_php user ON art.user_id = user.id WHERE user.id = ? AND art.id = ?"),
-                'currentArticle' => self::$db->prepare("SELECT art.*, user.username FROM " . self::$table_articles . " art JOIN users_php user ON art.user_id = user.id WHERE art.user_id = ? AND art.id = ?"),
-                'onUpdateArticle' => self::$db->prepare("UPDATE " . self::$table_articles . " SET title = ?, content = ?, created_at = NOW() WHERE id = ? AND user_id = ?"),
-            ];
-        }
-        return $this->QuaryRequest__Article;
+    $output = [];
+
+    if (!empty($debug_info)) {
+      $output['debug'] = $debug_info;
     }
 
-    /**
-     * @return [type]
-     * 
-     * @example $this->preparerRequestUser();
-     * @description служит для подготовки запросов к базе данных / it's need to prepare requests to the database
-     * 
-     */
-    public function preparerRequestUser()
-    {
-        if (empty($this->QuaryRequest__User)) {
-            $this->QuaryRequest__User = [
-                'getUser_id' => self::$db->prepare("SELECT * FROM " . self::$table_users . " WHERE id = ?"),
-                'getUser_username' => self::$db->prepare("SELECT * FROM " . self::$table_users . " WHERE username = ?"),
-                'getUser_email' => self::$db->prepare("SELECT * FROM " . self::$table_users . " WHERE mail = ?"),
-                'onSessionUser_id' => self::$db->prepare("SELECT `session` FROM " . self::$table_users . " WHERE id = ?"),
-                'onSessionUser_session' => self::$db->prepare("SELECT `session` FROM " . self::$table_users . " WHERE id = ?"),
-                'onUpdateSession' => self::$db->prepare("UPDATE " . self::$table_users . " SET `session` = ? WHERE id = ?"),
-            ];
-        }
-        return $this->QuaryRequest__User;
+    if ($db_error !== null) {
+      $output['db_error'] = [
+        'type' => $db_error['type'] ?? 'unknown',
+        'message' => $db_error['message'] ?? '',
+        'exception' => $db_error['exception'] ?? null,
+        'code' => $db_error['code'] ?? null,
+      ];
+
+      if (isset($db_error['errorInfo'])) {
+        $output['db_error']['pdo_error'] = $db_error['errorInfo'];
+      }
+
+      if (isset($db_error['rowCount'])) {
+        $output['db_error']['rows_affected'] = $db_error['rowCount'];
+      }
     }
 
-    /**
-     * @return [type]
-     * 
-     * @example $this->preparerRequestAuth();
-     * @description служит для подготовки запросов к базе данных / it's need to prepare requests to the database
-     * 
-     */
-    public function preparerRequestAuth()
-    {
-        if (empty($this->QuaryRequest__Auth)) {
-            $this->QuaryRequest__Auth = [
-                'onLogin_fetchUser_ByUsernanme' => self::$db->prepare("SELECT * FROM " . self::$table_users . " WHERE username = ?"),
-                'onLogin_fetchUser_ByMail' => self::$db->prepare("SELECT * FROM " . self::$table_users . " WHERE mail = ?"),
-                'onRegist_fetchUser_ByUsername' => self::$db->prepare("SELECT * FROM " . self::$table_users . " WHERE username = ?"),
-                'onRegist_fetchUser_ByMail' => self::$db->prepare("SELECT * FROM " . self::$table_users . " WHERE mail = ?"),
-                'onRegist_Create_User' => self::$db->prepare("INSERT INTO " . self::$table_users . " (username, mail, password, `group`, session) VALUES (?, ?, ?, ?, ?)"),
-            ];
-        }
-        return $this->QuaryRequest__Auth;
+    // HTML вывод
+    echo "<pre style='background:#f0f0f0;padding:10px;border:1px solid #ccc;margin:10px;font-size:12px;'>";
+    echo "<strong style='color:#d32f2f;'>" . htmlspecialchars($title) . "</strong>\n\n";
+
+    if (!empty($debug_info)) {
+      echo htmlspecialchars(implode("\n", $debug_info)) . "\n";
     }
+
+    if ($db_error !== null) {
+      echo "\n<strong style='color:#d32f2f;'>Ошибка БД:</strong>\n";
+      echo "Тип: " . htmlspecialchars($db_error['type'] ?? 'unknown') . "\n";
+      if (isset($db_error['message'])) {
+        echo "Сообщение: " . htmlspecialchars($db_error['message']) . "\n";
+      }
+      if (isset($db_error['code'])) {
+        echo "Код: " . htmlspecialchars($db_error['code']) . "\n";
+      }
+    }
+
+    echo "</pre>";
+
+    // JSON вывод (если нужно)
+    if ($as_json) {
+      echo json_encode($output, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    }
+  }
+
+  /**
+   * Быстрый вывод ошибки с минимальной информацией
+   *
+   * @param string $message Сообщение об ошибке
+   * @param mixed $db_error Детали ошибки из базы данных
+   * @param int $http_code HTTP код ответа
+   * @return void
+   */
+  public static function errorOutput(string $message, $db_error = null, int $http_code = 400)
+  {
+    http_response_code($http_code);
+
+    global $DB_ERROR_INFO;
+    if ($db_error === null && isset($DB_ERROR_INFO)) {
+      $db_error = $DB_ERROR_INFO;
+    }
+
+    $debug_info = ["Ошибка: " . $message];
+
+    if ($db_error !== null) {
+      $debug_info[] = "Детали: " . ($db_error['message'] ?? 'неизвестно');
+    }
+
+    self::debugOutput($debug_info, $db_error, 'Ошибка', true);
+  }
+
+
 }

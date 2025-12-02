@@ -30,8 +30,11 @@
  * в соответствии с условиями GNU General Public License, опубликованными
  * Фондом свободного программного обеспечения (Free Software Foundation), либо в версии 3 Лицензии, либо (по вашему выбору) в любой более поздней версии.
  *
+ *
+ * @license GPL-3.0-or-later (см. файл LICENSE.txt)
  * @author TimQwees
  * @link https://github.com/TimQwees/Qwees_CorePro
+ * 
  * 
  */
 
@@ -44,21 +47,6 @@ use App\Models\Network\Message;
 
 class AuthController extends Network
 {
-    private static $db;
-    private $network;
-    private $user;
-    private $verifyTable;
-
-    public function __construct()
-    {
-        // Инициализируем сессию
-        Network::init();
-
-        self::$db = Database::getConnection();
-        $this->network = new Network();
-        $this->user = new User();
-        $this->verifyTable = self::onTableCheck(self::$table_users);
-    }
 
     /**
      * @return [type]
@@ -70,7 +58,7 @@ class AuthController extends Network
     public function onLogin()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            self::onRedirect(self::$paths['login']);
+            self::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER']);
             return false;
         }
 
@@ -79,12 +67,12 @@ class AuthController extends Network
 
         if (empty($mail) || empty($password)) {
             Message::set('error', 'Пожалуйста, заполните все поля');
-            self::onRedirect(self::$paths['login']);
+            self::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER']);
         }
 
         if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
             Message::set('error', 'Неверный формат почты');
-            self::onRedirect(self::$paths['login']);
+            self::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER']);
         }
 
         try {
@@ -100,14 +88,14 @@ class AuthController extends Network
                     'mail' => $user['mail']
                 ];
                 Message::set('success', 'Вы успешно вошли в систему');
-                return self::onRedirect(self::$paths['account']);
+                return self::onRedirect($_ENV['REDIRECT_SIGN_USER']);
             } else {
                 Message::set('error', 'Неверная почта или пароль');
-                return self::onRedirect(self::$paths['login']);
+                return self::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER']);
             }
         } catch (\Exception $e) {
             Message::set('error', 'Произошла ошибка при входе в систему');
-            return self::onRedirect(self::$paths['login']);
+            return self::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER']);
         }
     }
 
@@ -125,58 +113,54 @@ class AuthController extends Network
             $username = (string) trim($_POST['username'] ?? '');
             $password = $_POST['password'] ?? '';
             $group = (int) $_POST['group'] ?? '';
+
             // Валидация
             if (empty($username) || empty($password) || empty($mail) || empty($group)) {
                 Message::set('error', 'Пожалуйста, заполните все поля');
-                return self::onRedirect(self::$paths['regist']);
+                return self::onRedirect($_ENV['REDIRECT_REG_UNSIGN_USER']);
             }
 
             if (strlen($username) < 3) {
                 Message::set('error', 'Имя пользователя должно содержать минимум 3 символа');
-                return self::onRedirect(self::$paths['regist']);
+                return self::onRedirect($_ENV['REDIRECT_REG_UNSIGN_USER']);
             }
 
             if (strlen($password) < 6) {
                 Message::set('error', 'Пароль должен содержать минимум 6 символов');
-                return self::onRedirect(self::$paths['regist']);
+                return self::onRedirect($_ENV['REDIRECT_REG_UNSIGN_USER']);
             }
 
             if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
                 Message::set('error', 'Неверный формат почты');
-                return self::onRedirect(self::$paths['regist']);
+                return self::onRedirect($_ENV['REDIRECT_REG_UNSIGN_USER']);
             }
 
             try {
-                $this->verifyTable;//check table
-                $stmt = $this->network->QuaryRequest__Auth['onRegist_fetchUser_ByUsername'];
-                $stmt->execute([$username]);
-                if ($stmt->fetchColumn() > 0) {
+                $result_name = Database::send("SELECT COUNT(*) as count FROM " . User::$table_name . " WHERE username = ?", [$username]);
+                if (is_array($result_name) && $result_name[0]['count'] > 0) {
                     Message::set('error', "Пользователь с именем: $username уже существует");
-                    self::onRedirect(self::$paths['regist']);
+                    self::onRedirect($_ENV['REDIRECT_REG_UNSIGN_USER']);
                     return false;
                 }
 
-                $stmt = $this->network->QuaryRequest__Auth['onRegist_fetchUser_ByMail'];
-                $stmt->execute([$mail]);
-                if ($stmt->fetchColumn() > 0) {
+                $result_email = Database::send("SELECT COUNT(*) as count FROM " . User::$table_name . " WHERE mail = ?", [$mail]);
+                if (is_array($result_email) && $result_email[0]['count'] > 0) {
                     Message::set('error', "Почта: $mail уже существует");
-                    return self::onRedirect(self::$paths['regist']);
+                    return self::onRedirect($_ENV['REDIRECT_REG_UNSIGN_USER']);
                 }
 
-                $stmt = $this->network->QuaryRequest__Auth['onRegist_Create_User'];
-                $stmt->execute([
+                Database::send("INSERT INTO " . User::$table_name . " (username, mail, password, `group`, session) VALUES (?, ?, ?, ?, ?)", [
                     $username,
                     $mail,
                     password_hash($password, PASSWORD_DEFAULT),
                     $group,
-                    'on'//session
+                    'on' //session element
                 ]);
-
                 Message::set('success', "Регистрация успешна! $username, Теперь вы можете войти");
-                return self::onRedirect(self::$paths['login']);
+                return self::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER']);
             } catch (\PDOException $e) {
                 Message::set('error', 'Ошибка при регистрации: ' . $e->getMessage());
-                return self::onRedirect(self::$paths['regist']);
+                return self::onRedirect($_ENV['REDIRECT_REG_UNSIGN_USER']);
             }
         }
     }
@@ -192,6 +176,6 @@ class AuthController extends Network
         Network::destroy();
 
         Message::set('success', 'Вы успешно вышли из системы');
-        return self::onRedirect(self::$paths['login']);
+        return self::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER']);
     }
 }
