@@ -1,61 +1,63 @@
 <div align="center">
-    <img src="https://github.com/timqwees/QweesCore/blob/view/assets/fline_white.png?raw=true" alt="QweesCore Logo" width="320">
+    <img src="https://github.com/timqwees/QweesCore/blob/view/assets/fline_original.png?raw=true" alt="QweesCore Logo" width="320">
   <div style="margin-top: 10px;max-width:450px">
-    <a href="https://www.gnu.org/licenses/gpl-3.0" target="_blank">
+    <a style="text-decoration:none" href="https://www.gnu.org/licenses/gpl-3.0" target="_blank">
       <img src="https://badgen.net/badge/license/GPL%203.0%20or%20later/green?icon=github" alt="License: GPL 3.0 or later" />
     </a>
-    <a href="https://github.com/timqwees/qweescore" target="_blank">
+    <a style="text-decoration:none" href="https://github.com/timqwees/qweescore" target="_blank">
       <img src="https://badgen.net/github/stars/timqwees/qweescore" alt="Stars QweesCore" />
     </a>
-    <a href="https://github.com/timqwees/qweescore" target="_blank">
+    <a style="text-decoration:none" href="https://github.com/timqwees/qweescore" target="_blank">
       <img src="https://badgen.net/badge/author/timqwees" alt="Stars QweesCore" />
     </a>
     <span>
       <img src="https://badgen.net/badge/php/%3E%3D7.4/8892BF" alt="Stars QweesCore" />
     </span>
-    <a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller" target="_blank">
+    <a style="text-decoration:none" href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller" target="_blank">
       <img src="https://badgen.net/badge/arch/MVC/green" alt="Architecture: MVC" />
     </a>
-    <a href="https://www.php.net/manual/en/book.pdo.php" target="_blank">
+    <a style="text-decoration:none" href="https://www.php.net/manual/en/book.pdo.php" target="_blank">
       <img src="https://badgen.net/badge/uses/PDO/orange" alt="Uses: PDO" />
     </a>
-    <a href="https://github.com/PHPMailer/PHPMailer" target="_blank">
+    <a style="text-decoration:none" href="https://github.com/PHPMailer/PHPMailer" target="_blank">
       <img src="https://badgen.net/badge/integration/PHPMailer/purple" alt="Integration: PHPMailer" />
+    </a>
+    <a style="text-decoration:none" href="#">
+      <img src="https://img.shields.io/badge/API-REST-brightgreen.svg" alt="API: REST">
+    </a>
+    <a style="text-decoration:none" href="#">
+      <img src="https://img.shields.io/badge/format-JSON--API-e67e22.svg" alt="Format: JSON-API">
     </a>
   </div>
 </div>
 
 # QweesCore — Документация
 
-> **Версия:** **`2.0.0`**
-> **Статус:** официальный релиз
+> **Версия:** **`2.1.0`**
+> **Автор:** [timqwees technology](https://github.com/timqwees)
+> **Последнее обновление:** 15 декабря 2025 [21:30]
 
 ---
 
 ### Установка
 
-1. [X] **Автоматический (рекомендуемый):**
+Автоматический (рекомендуемый):
 
 ```bash
-npx qwees install
+> npx qwees install <app_name>
 ```
 
 Файл `index.php` в корне исполняет инициализацию Network и запускает роутер.
 
-# Обновления в версии 2.0.0
+# Что нового в QweesCore 2.1.0
 
-- Полная переработка ядра Network
-- Полная переработка архитектуры - изоляция от корня
-- Улучшенная система роутинга
-- Автоматические миграции и конвертация SQLite ↔ MySQL
-- Улучшенная структура проекта и автозагрузка
-- Модульная система контроллеров
-- Оптимизация производительности ядра
-- Улучшенная система сообщений и сессий
-- Стабильный шаблонизатор auto_element
-- Интеграция PHPMailer через единый API
-- Полная документация и стандартный README
-- Нулевая конфигурация
+1. **Современная реактивность:** Переменные между роутером и страницами теперь синхронизируются мгновенно и без сторонних библиотек, что делает интерфейс ещё динамичнее.
+2. **Надёжная система пользователей:** Полностью улучшена логика регистрации, входа и авторизации. Теперь все процессы работают автоматизировано и максимально прозрачно для разработчика.
+3. **Гибкость и чистота в User:** Имя таблицы пользователей теперь задаётся отдельным свойством, а метод `getUser` сразу возвращает результаты — без лишних обёрток.
+4. **Новый модуль статей:** Проведён глубокий рефакторинг статьи — стабильность и надёжность стали выше.
+5. **Обновлены сессии:** Механизм работы сессий стал ещё безопаснее и предсказуемее.
+6. **Корректная обработка ошибок:** Теперь ошибки роутинга чётко указывают путь к 404, а также правильно отображают методы (GET/POST), даже если ваша функция не найдена.
+7. **Собственные API без усилий:** Просто определяйте свои API-прослойки через встроенный роутинг QweesCore — всё работает «из коробки»!
 
 ## Содержание
 
@@ -70,16 +72,17 @@ npx qwees install
 - [9. Система шаблонов и фронтенд](#9-система-шаблонов-и-фронтенд)
 - [10. Система сообщений](#10-система-сообщений)
 - [11. CLI и вспомогательные скрипты](#11-cli-и-вспомогательные-скрипты)
-- [12. Безопасность и рекомендации](#12-безопасность-и-рекомендации)
-- [13. Список изменений — релиз 2.0.0](#13-список-изменений--релиз-200)
-- [14. Лицензия](#14-лицензия)
-- [15. Автор](#15-автор)
+- [12. Работа с API и cURL](#12-работа-с-api-и-curl)
+- [13. Безопасность и рекомендации](#13-безопасность-и-рекомендации)
+- [14. Список изменений — релиз 2.0.0](#14-список-изменений--релиз-200)
+- [15. Лицензия](#15-лицензия)
+- [16. Автор](#16-автор)
 
 ---
 
 ### 1. Требования
 
-- PHP 8.0+
+- PHP 7.4+
 - PDO с драйверами sqlite и mysql
 - Composer для установки зависимостей
 - SMTP доступ (опционально, если используется отправка почты)
@@ -267,7 +270,61 @@ Flash‑сообщения реализованы в классе `Message`. API
 
 ---
 
-### 12. Безопасность и рекомендации
+### 12. Работа с API и cURL
+
+QweesCore предоставляет современный универсальный способ создания и обслуживания API-эндпоинтов, полностью поддерживающий работу как из PHP-кода, так и через cURL или другие HTTP‑клиенты.
+
+**1. Быстрая регистрация маршрутов API**
+
+В файле `setting/route/routes.php` определяйте GET/POST‑эндпоинты как анонимными функциями, так и через штатный API‑класс:
+
+```php
+// Простейший GET-запрос
+Routes::get('/api/hello', function() { echo API::send('/qwees.json'); });
+
+// Пример POST-запроса — рекомендуется использовать встроенный API::send для корректного ответа
+Routes::post('/api/send', fn() => print(API::send('/qwees.json')));
+или
+Routes::post('/api/hello', function() { echo API::send('/qwees.json'); });
+```
+
+**Пример реализации метода:**
+```php
+// setting/route/function/functions.php
+public function on_API()
+{
+    echo API::send('/public/pages/main/qwees.json');
+}
+```
+
+**2. Формат и специфика обработки (PHP и cURL)**
+
+- Все API‑ответы возвращаются только в формате JSON + с корректным HTTP‑статусом.
+- Любой вызов через `API::send()` или `API::request()` возвращает структуру:
+    ```json
+    {
+      "status": "success" | "error" | "qwees_crash",
+      "data": ...,
+      "message": "...",
+      "meta": {
+        "method": "POST",
+        "path": "/api/..."
+      }
+    }
+    ```
+- Поддержка cURL: просто укажите заголовок `Content-Type: application/json` и передайте данные через `-d`:
+    ```bash
+    curl -X POST https://example.com/api/... \
+         -H "Content-Type: application/json" \
+         -d '{"key":"value"}'
+    ```
+  Фреймворк автоматически обработает входящий JSON, обновит файл (при необходимости), всегда выдаст корректный статус (см. подробности в [`API`](app/Controllers/API/API.php)).
+- Если данные не были переданы или неверны, клиенту будет возвращён статус "error" и поясняющее сообщение.
+- Ответ всегда содержит всю контекстную информацию, что удобно для интеграций и тестирования через cURL.
+
+---
+
+### 13. Безопасность и рекомендации
 
 - Обновляйте зависимости через Composer
 - Проводите бэкапы БД и `.env`
@@ -275,7 +332,7 @@ Flash‑сообщения реализованы в классе `Message`. API
 - Применяйте HTTPS в production
 - Ограничьте права доступа к файлам и папкам
 
-### 13. Список изменений — релиз 2.0.0
+### 14. Список изменений — релиз 2.0.0
 
 - Полная стабилизация и рефакторинг ядра Network: единый API доступа ко всем подсистемам, стандартизированные методы, централизованная обработка ошибок, более чистая архитектура во всём проекте.
 - Расширенная поддержка миграций и схемы данных: Network теперь автоматически применяет schema.sql из папки setting/schema, адаптирует SQL‑инструкции под SQLite или MySQL, а также выполняет трансляцию ключевых отличий в синтаксисе (например, AUTOINCREMENT ↔ AUTO_INCREMENT). Больше не требуется ручная настройка миграций — всё в автоматическом режиме.
@@ -289,13 +346,13 @@ Flash‑сообщения реализованы в классе `Message`. API
 
 ---
 
-### 14. Лицензия
+### 15. Лицензия
 
 Проект распространяется под лицензией: `GPL-3.0-or-later`.
 
 ---
 
-### 15. Автор
+### 16. Автор
 
 Автор фрамйворка: `timqwees technology`
 

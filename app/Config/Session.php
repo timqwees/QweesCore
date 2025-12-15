@@ -42,104 +42,117 @@ namespace App\Config;
 
 class Session
 {
-  /**
-   * @return [type]
-   *
-   * @example Session::init();
-   * @description инициализирует сессию и устанавливает параметры / initialize session and set parameters
-   *
-   */
-  public static function init()
-  {
-    // Не инициализировать сессию, если заголовки уже были отправлены
-    if (headers_sent()) {
-      // Опционально: здесь можно записать предупреждение или ошибку в лог
-      return;
-    }
-
-    if (session_status() === PHP_SESSION_NONE) {
-      $params = [
-        'lifetime' => 86400, // 24 часа
-        'path' => '/',
-        'domain' => $_SERVER['HTTP_HOST'] ?? '',
-        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? null) == 443,
-        'httponly' => true,
-        'samesite' => 'Lax'
-      ];
-
-      // Определяем папку для хранения сессий во временной директории пользователя,
-      // или используем safer location если нет прав на /tmp/<user>
-      $defaultSessionSavePath = sys_get_temp_dir();
-      $customSessionDir = $defaultSessionSavePath . '/session';
-
-      // Проверяем возможность записи в директорию, иначе используем php.ini по умолчанию
-      if (!is_dir($customSessionDir)) {
-        @mkdir($customSessionDir, 0700, true);
-      }
-
-      if (is_writable($customSessionDir)) {
-        session_save_path($customSessionDir);
-      }
-      // else не трогаем session.save_path, PHP сам попытается использовать значение по умолчанию
-
-      // PHP < 7.3 совместимость (нет массива options)
-      if (PHP_VERSION_ID < 70300) {
-        session_set_cookie_params(
-          $params['lifetime'],
-          $params['path'] . '; samesite=' . $params['samesite'],
-          $params['domain'],
-          $params['secure'],
-          $params['httponly']
-        );
-      } else {
-        session_set_cookie_params($params);
-      }
-
-      @session_start();
-      // подавляем предупреждения, которые могут возникнуть из-за отсутствия прав на папку сессий
-    }
-  }
+  private static $cookieName = "__qweescore_cookie";
+  private static $data = null;
+  private static $lifetime = 86400; // 1 day
 
   /**
-   * @return [type]
-   *
-   * @example Session::regenerate();
-   * @description регенерирует сессию для защиты от атак / regenerate session for protection against attacks
-   * требуеться во всех файлах, где требуеться запрос к данным пользователя
-   *
+   * Универсальный метод для управления cookie-сессией.
+   * ---
+   * ### Все варианты использования:
+   * 1. Получить все значения:                   *```Session::control()```*
+   * 2. Получить значение по ключу:              *```Session::control('key')```*
+   * 3. Получить значения по нескольким ключам:  *```Session::control(['key1', 'key2'])```*
+   * 4. Установить значение:                     *```Session::control('key', 'value')```*
+   * 5. Установить несколько значений:           *```foreach ($arr as $k=>$v) Session::control($k, $v)```*
+   * 6. Удалить ключ:                            *```Session::control('key', null)```*
+   * 7. Удалить несколько ключей:                *```Session::control(['key1', 'key2'], null)```*
+   * 8. Очистить всю сессию:                     *```Session::control(null)```*
+   *---
+   * @param null|string|array $name Ключ, массив ключей или null для полной очистки
+   * @param mixed $value Значение (null - удаление)
+   * @return mixed
    */
-  public static function regenerate()
+  public static function init($name = '', $value = null)
   {
-    if (session_status() === PHP_SESSION_ACTIVE) {
-      if (!headers_sent()) {
-        @session_regenerate_id(true);
-        // подавляем возможные предупреждения, мы не хотим показывать ошибки прав пользователям
-      }
-      // else optionally log a warning that regeneration is not possible
-    }
-  }
-
-  /**
-   * @return [type]
-   *
-   * @example Session::destroy();
-   * @description уничтожает сессию / destroy session
-   *
-   */
-  public static function destroy()
-  {
-    if (session_status() === PHP_SESSION_ACTIVE) {
-      $_SESSION = array();
-
-      if (isset($_COOKIE[session_name()])) {
-        if (!headers_sent()) {
-          setcookie(session_name(), '', time() - 3600, '/');
+    // Загружаем данные из cookie
+    if (self::$data === null) {
+      self::$data = [];
+      if (!empty($_COOKIE[self::$cookieName])) {
+        $tmp = json_decode($_COOKIE[self::$cookieName], true);
+        if (is_array($tmp)) {
+          self::$data = $tmp;
         }
-        // else optionally log a warning that cookie can't be set
       }
-
-      @session_destroy();
-      // подавляем возможные предупреждения на случай проблем с правами
     }
+
+    // === Удаление всей сессии ===
+    if ($name === null) {
+      self::$data = [];
+      self::rewrite(true); // удаление cookie
+      return true;
+    }
+
+    // === Получение всех данных ===
+    if ($name === '' || $name === false || empty($name)) {
+      return self::$data;
+    }
+
+    // === Удаление нескольких ключей ===
+    if (is_array($name) && $value === null) {
+      foreach ($name as $key) {
+        unset(self::$data[$key]);
+      }
+      self::rewrite();
+      return true;
+    }
+
+    // === Получение нескольких значений ===
+    if (is_array($name) && $value !== null) {
+      $result = [];
+      foreach ($name as $key) {
+        $result[$key] = self::$data[$key] ?? null;
+      }
+      return $result;
+    }
+
+    // === Получение одного значения ===
+    if ($value === null && isset(self::$data[$name])) {
+      return self::$data[$name];
+    }
+
+    // === Удаление одного ключа ===
+    if ($value === null) {
+      unset(self::$data[$name]);
+      self::rewrite();
+      return true;
+    }
+
+    // === Установка значения ===
+    self::$data[$name] = $value;
+    self::rewrite();
+    return true;
+  }
+
+  /**
+   * Записывает cookie
+   * @param bool $remove удалить cookie
+   */
+  private static function rewrite($all_remove = false)
+  {
+    if ($all_remove) {
+      setcookie(
+        self::$cookieName,
+        '',
+        time() - 3600,
+        '/',
+        '',
+        false,
+        true
+      );
+      return true;
+    }
+
+    setcookie(
+      self::$cookieName,
+      json_encode(self::$data, JSON_UNESCAPED_UNICODE),
+      time() + self::$lifetime,
+      '/',
+      '',
+      false,
+      true
+    );
+
+    return true;
   }
 }

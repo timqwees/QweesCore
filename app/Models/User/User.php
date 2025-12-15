@@ -50,25 +50,45 @@ class User extends Network
 
   public function __construct()
   {
-    $this->table_name = 'users';
+    $this->table_name = isset($_ENV['DB_USERS_TABLE']) ? $_ENV['DB_USERS_TABLE'] : 'users';
   }
 
   /**
-   * Получает данные пользователя по определённому типу идентификатора
+   * 📦 **Получение данных пользователя по типу идентификатора**
    *
-   * @param string $type Тип идентификатора пользователя ('id', 'username', 'email' и др.)
-   * @param int|string $value Значение идентификатора (например, 1, 'admin', 'admin@example.com')
+   * ---
    *
-   * @return array|bool Массив с данными пользователя или false в случае ошибки
+   * **Возможности использования:**
    *
-   * @example $this->getUser('id', 1);
-   * @description Получает данные пользователя по id / Get user data by id
+   * 1. **Поиск по ID**
+   *    _Получает данные пользователя по уникальному идентификатору:_
+   *    ```php
+   *    $this->getUser('id', 1);
+   *    ```
    *
-   * @example $this->getUser('username', 'admin');
-   * @description Получает данные пользователя по username / Get user data by username
+   * 2. **Поиск по имени пользователя**
+   *    _Возвращает информацию о пользователе по username:_
+   *    ```php
+   *    $this->getUser('username', 'admin');
+   *    ```
    *
-   * @example $this->getUser('email', 'admin@example.com');
-   * @description Получает данные пользователя по email / Get user data by email
+   * 3. **Поиск по e-mail**
+   *    _Получить по эл. почте:_
+   *    ```php
+   *    $this->getUser('email', 'admin@example.com');
+   *    ```
+   *
+   * ---
+   *
+   * **Параметры:**
+   * - `string $type` &mdash; _Тип идентификатора_ (`id`, `username`, `email` и др.)
+   * - `int|string $value` &mdash; _Значение для поиска (например, 1, 'admin', 'email@example.com')_
+   *
+   * **Возвращает:**
+   * - `array` — если пользователь найден
+   * - `false` — если не найден или ошибка
+   *
+   * _Позволяет гибко получать пользователя по разным уникальным полям._
    */
   public function getUser(string $type, $value): array|bool
   {
@@ -89,7 +109,7 @@ class User extends Network
           $result = Database::send("SELECT * FROM " . $this->table_name . " WHERE mail = ?", [$value]);
           break;
       }
-      return $result;
+      return is_array($result) && !empty($result) ? $result[0] : false;
     } catch (\PDOException $e) {
       error_log("Ошибка при получении пользователя: " . $e->getMessage());
       return false;
@@ -97,16 +117,29 @@ class User extends Network
   }
 
   /**
-   * Обновляет данные пользователя с помощью массива данных
+   * 🛠️ **Обновление профиля пользователя**
    *
-   * @param string $tableName Имя таблицы, в которой обновлять данные
-   * @param array $new_data Ассоциативный массив столбцов и их новых значений (например, ['username' => 'admin', 'email' => 'timqwees@gmail.com'])
-   * @param int $userId ID пользователя, чьи данные обновляются
+   * ---
    *
-   * @return bool true в случае успеха, false в случае ошибки
+   * **Как использовать:**
    *
-   * @example $this->onUpdateProfile('users', ['username' => 'admin', 'email' => 'timqwees@gmail.com'], 1);
-   * @description обновляет данные пользователя с помощью массива данных и ID пользователя / update user data with array of fields and user id
+   * 1. _Обновить несколько полей пользователя по ID:_
+   *    ```php
+   *    $this->onUpdateProfile('users', ['username' => 'admin', 'email' => 'timqwees@gmail.com'], 1);
+   *    ```
+   *
+   * ---
+   *
+   * **Параметры:**
+   * - `string $tableName` — _Имя таблицы, где обновлять данные_
+   * - `array $new_data` — _Массив новых данных (`['поле' => 'значение', ...]`)_
+   * - `int $userId` — _ID пользователя_
+   *
+   * **Результат:**
+   * - `true` — если успешно
+   * - `false` — если ошибка
+   *
+   * _Удобен для массового или точечного изменения профиля пользователя._
    */
   public function onUpdateProfile(string $tableName, array $new_data, int $userId)
   {
@@ -142,14 +175,33 @@ class User extends Network
   }
 
   /**
-   * Загружает файл и возвращает путь к нему
-   * @param array $file Массив с данными файла из $_FILES
-   * @param string $prefix Префикс для имени файла (обычно ID пользователя)
-   * @param string|null $customName Пользовательское имя файла (без расширения)
-   * @return string|false Путь к файлу или false в случае ошибки
+   * 📤 **Загрузка файла с сохранением пути**
    *
-   * @example $this->uploadFile($_FILES['file'], 'id пользователя', 'имя файла');
-   * @description загружает файл и возвращает путь к нему / upload file and return path to it
+   * ---
+   *
+   * **Сценарии использования:**
+   *
+   * - _Загрузка аватара пользователя:_
+   *   ```php
+   *   $this->uploadFile($_FILES['file'], '10', 'avatar10');
+   *   ```
+   * - _Указать только id пользователя:_
+   *   ```php
+   *   $this->uploadFile($_FILES['file'], 'id пользователя');
+   *   ```
+   *
+   * ---
+   *
+   * **Параметры:**
+   * - `array $file` — _Массив из $_FILES_
+   * - `string $prefix` — _Префикс для имени_ (обычно — id)
+   * - `string|null $customName` — _Свое имя файла (без расширения)_
+   *
+   * **Возвращает:**
+   * - `string` — путь `avatar/имя_файла` при успехе
+   * - `false` — если ошибка
+   *
+   * _Защищает от опасных расширений, ограничивает размер и создает директории при необходимости._
    */
   function uploadFile(array $file, string $prefix = '', ?string $customName = null): string|false
   {
@@ -205,64 +257,64 @@ class User extends Network
     }
   }
 
-  /**
-   * Проверяет сессию пользователя по его ID
-   *
-   * @param int $index ID пользователя
-   * @return bool true если сессия активна, false если нет или при ошибке
-   *
-   * @example $this->onSessionUser(0);
-   * @description проверяет сессию пользователя с указанным ID / check user session by user ID
-   */
-  public function onSessionUser(int $index)
-  {
-    try {
-      if ($index === False) {
-        Network::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER'] ?: '/');
-        session_destroy();
-        return false;
-      }
+  // /**
+  //  * Проверяет сессию пользователя по его ID
+  //  *
+  //  * @param int $index ID пользователя
+  //  * @return bool true если сессия активна, false если нет или при ошибке
+  //  *
+  //  * @example $this->onSessionUser(0);
+  //  * @description проверяет сессию пользователя с указанным ID / check user session by user ID
+  //  */
+  // public function onSessionUser(int $index)
+  // {
+  //   try {
+  //     if ($index === False) {
+  //       Network::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER'] ?: '/');
+  //       session_destroy();
+  //       return false;
+  //     }
 
-      $result = Database::send("SELECT `session` FROM " . $this->table_name . " WHERE id = ?", [$index]);
+  //     $result = Database::send("SELECT `session` FROM " . $this->table_name . " WHERE id = ?", [$index]);
 
-      if ($result['session'] === 'off') {//сессия отключена / вышел с аккаунта
-        Network::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER'] ?: '/');
-        session_destroy();
-        return false;
-      } else {
-        Network::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER'] ?: '/');
-        session_destroy();
-        return true;
-      }
-    } catch (\PDOException $e) {
-      error_log("Ошибка при проверке пользователя: " . $e->getMessage());
-      Network::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER'] ?: '/');
-      session_destroy();
-      return false;
-    }
-  }
+  //     if ($result['session'] === 'off') {//сессия отключена / вышел с аккаунта
+  //       Network::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER'] ?: '/');
+  //       session_destroy();
+  //       return false;
+  //     } else {
+  //       Network::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER'] ?: '/');
+  //       session_destroy();
+  //       return true;
+  //     }
+  //   } catch (\PDOException $e) {
+  //     error_log("Ошибка при проверке пользователя: " . $e->getMessage());
+  //     Network::onRedirect($_ENV['REDIRECT_LOG_UNSIGN_USER'] ?: '/');
+  //     session_destroy();
+  //     return false;
+  //   }
+  // }
 
-  /**
-   * Обновляет статус сессии пользователя
-   *
-   * @param string $status Новый статус сессии ('on' или 'off')
-   * @param int $userId ID пользователя
-   * @return bool true в случае успеха, false в случае ошибки
-   *
-   * @example $this->updateSessionStatus('on', 1);
-   * @description обновляет статус сессии пользователя с указанным ID / update user session status by user ID
-   */
-  public function updateSessionStatus(string $status, int $userId)
-  {
-    try {
-      Database::send("UPDATE " . $this->table_name . " SET `session` = ? WHERE id = ?", [
-        $status,
-        $userId
-      ]);
-      return true;
-    } catch (\PDOException $e) {
-      error_log("Ошибка при обновлении статуса сессии: " . $e->getMessage());
-      return false;
-    }
-  }
+  // /**
+  //  * Обновляет статус сессии пользователя
+  //  *
+  //  * @param string $status Новый статус сессии ('on' или 'off')
+  //  * @param int $userId ID пользователя
+  //  * @return bool true в случае успеха, false в случае ошибки
+  //  *
+  //  * @example $this->updateSessionStatus('on', 1);
+  //  * @description обновляет статус сессии пользователя с указанным ID / update user session status by user ID
+  //  */
+  // public function updateSessionStatus(string $status, int $userId)
+  // {
+  //   try {
+  //     Database::send("UPDATE " . $this->table_name . " SET `session` = ? WHERE id = ?", [
+  //       $status,
+  //       $userId
+  //     ]);
+  //     return true;
+  //   } catch (\PDOException $e) {
+  //     error_log("Ошибка при обновлении статуса сессии: " . $e->getMessage());
+  //     return false;
+  //   }
+  // }
 }

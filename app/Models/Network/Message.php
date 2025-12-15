@@ -40,65 +40,114 @@
 
 namespace App\Models\Network;
 
+use App\Config\Session;
+
 class Message
 {
   /**
-   * Устанавливает уведомление в сессию
+   * **Установка уведомления для пользователя**
    *
-   * @param string $type Тип уведомления (например, 'success', 'error', 'info')
-   * @param string $message Текст уведомления
+   * _Сохраняет новое уведомление в cookie-сессию (через Session::init)._
    *
+   * ---
+   * **Параметры:**
+   * - **$type** — _тип уведомления:_
+   *   Например: `'success'`, `'error'`, `'info'`.
+   * - **$message** — _текстовое сообщение уведомления_.
+   *
+   * ---
+   * **Использование:**
+   * _Пример:_
+   * ```php
+   * Message::set('success', 'Операция выполнена успешно');
+   * ```
+   *
+   * ⮞ Сохраняет уведомление выбранного типа с произвольным текстом в cookie-сессию.
+   *
+   * @param string $type    Тип уведомления (например 'success', 'error', 'info')
+   * @param string $message Сообщение
    * @return void
-   *
-   * @example Message::set('success', 'Операция выполнена успешно');
-   * @description Сохраняет уведомление с указанным типом и сообщением в сессию / Set notification with type and message to session
    */
   public static function set($type, $message)
   {
-    $_SESSION['notification'] = [
+    Session::init('notification', [
       'type' => $type,
       'message' => $message
-    ];
+    ]);
   }
 
   /**
-   * Получает уведомление из сессии и удаляет его
+   * **Получение и удаление уведомления**
    *
-   * @return array|null Массив с уведомлением (['type' => ..., 'message' => ...]) или null, если уведомление отсутствует
+   * _Извлекает уведомление пользователя из cookie-сессии и сразу его удаляет._
    *
-   * @example Message::getAll();
-   * @description Получает уведомление из сессии и удаляет его / Get notification from session and remove it
+   * ---
+   * **Возвращает:**
+   * - `array('type' => ..., 'message' => ...)` — если уведомление найдено
+   * - `null` — если уведомления нет
+   *
+   * ---
+   * **Пример вызова:**
+   * ```php
+   * Message::getAll();
+   * ```
+   *
+   * @return array|null
    */
   public static function getAll()
   {
-    if (isset($_SESSION['notification'])) {
-      $message = $_SESSION['notification'];//array
-      unset($_SESSION['notification']);
-      return $message;
+    $data = Session::init('notification') ?? null;
+    if (is_array($data) && (isset($data['type']) || isset($data['message']))) {
+
+      Session::init('notification', null);
+      return [
+        'type' => $data['type'] ?? '',
+        'message' => $data['message'] ?? ''
+      ];
     }
     return null;
   }
 
   /**
-   * Проверяет, существует ли уведомление в сессии
+   * **Проверка наличия активного уведомления**
    *
-   * @return bool true если уведомление существует, false если нет
+   * _Выясняет, хранится ли уведомление сейчас в cookie-сессии._
    *
-   * @example Message::has();
-   * @description Проверяет, установлено ли уведомление в сессии / Check if notification exists in session
+   * ---
+   * **Возвращает:**
+   * - `true` — если уведомление есть
+   * - `false` — если уведомления нет
+   *
+   * ---
+   * _Пример:_
+   * ```php
+   * if (Message::has()) { ... }
+   * ```
+   *
+   * @return bool
    */
   public static function has()
   {
-    return isset($_SESSION['notification']);
+    $data = Session::init('notification') ?? null;
+    return is_array($data) && isset($data['type']) && isset($data['message']);
   }
 
   /**
-   * Возвращает пустое уведомление (массив с пустыми значениями типа и сообщения)
+   * **Вернуть "пустое" уведомление**
    *
-   * @return array Массив с ключами 'type' и 'message', оба значения пустые строки
+   * _Формирует структуру, где поля типа и текста уведомления — пустые строки._
    *
-   * @example Message::null();
-   * @description возвращает массив с пустыми значениями для типа и сообщения / returns array with empty type and message
+   * ---
+   * **Возвращает:**
+   * `['type' => '', 'message' => '']`
+   *
+   * ---
+   * _Пример:_
+   * ```php
+   * $empty = Message::null();
+   * ```
+   *
+   * @return array
    */
   public static function null()
   {
@@ -106,16 +155,26 @@ class Message
   }
 
   /**
-   * Автоматически возвращает уведомление из сессии, если оно существует, иначе возвращает пустое уведомление
+   * **Универсальный вариант: получить актуальное уведомление**
    *
-   * @return array Массив с уведомлением (['type' => ..., 'message' => ...]) или массив с пустыми значениями, если уведомление отсутствует
+   * _Если уведомление существует — возвращает его и обнуляет, иначе возвращает пустую структуру._
    *
-   * @example Message::controll();
-   * @description Проверяет наличие уведомления в сессии и возвращает его, либо возвращает массив с пустыми значениями / Checks if notification exists in session and returns it, or returns array with empty values
+   * ---
+   * **Точно гарантирует:**
+   * - результат всегда будет массивом с ключами `'type'` и `'message'`
+   * - если уведомления нет, значения будут пустыми
+   *
+   * ---
+   * _Удобный пример:_
+   * ```php
+   * $notify = Message::controll();
+   * ```
+   *
+   * @return array
    */
   public static function controll()
   {
-    return Message::has() ? Message::getAll() : Message::null();
+    return self::has() ? self::getAll() : self::null();
   }
 
 }

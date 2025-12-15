@@ -57,20 +57,31 @@ class Network extends Session
 
   public function __construct()
   {
-    Session::init();
     self::$db = Database::getConnection();
   }
 
   /**
-   * Проверяет и инициализирует все таблицы, определённые в файле схемы базы данных (schema.sql).
+   * **Инициализация всех таблиц из schema.sql**
    *
-   * Если какой-либо таблицы не существует — создаёт её на основе схемы.
-   * Используется для автоматической инициализации структуры базы данных при запуске приложения.
+   * -- _Этот метод автоматически создаёт все отсутствующие таблицы, определённые в вашей схеме базы данных_
    *
+   * ---
+   * **Применение:**
+   * - ✔ <b>Автоматическая инициализация структуры БД</b> при первом запуске или обновлении структуры
+   *
+   * ---
+   * **Выполняет:**
+   *  - Читает файл схемы (`schema.sql`)
+   *  - Проверяет существование каждой таблицы
+   *  - Создаёт отсутствующие таблицы
+   *
+   * ---
+   * **Примеры:**
+   * - <code>Network::onTableAllExists();</code>
+   *
+   * ---
    * @return void
-   *
-   * @example Network::onTableAllExists();
-   * @description Проверяет наличие всех таблиц из схемы и создаёт отсутствующие / Checks all tables from schema and creates missing ones
+   * @see Network::onTableExists() для проверки отдельных таблиц
    */
   public static function onTableAllExists()
   {
@@ -116,16 +127,26 @@ class Network extends Session
   }
 
   /**
-   * Проверяет существование таблицы в базе данных.
+   * **Проверка существования таблицы в базе данных**
    *
-   * Используется для автоматической проверки наличия таблицы перед выполнением операций с ней.
-   * Возвращает true, если таблица существует, иначе false.
+   * _Метод для автоматической проверки: есть ли указанная таблица._
    *
-   * @param string $tableName Имя таблицы для проверки.
+   * ---
+   * **Использование:**
+   * - <i>Возвращает <b>true</b>, если таблица существует, иначе <b>false</b>.</i>
+   *
+   * ---
+   * **Параметры:**
+   * - <b>$tableName</b> (string): Имя таблицы для проверки.
+   *
+   * ---
+   * <b>Пример:</b>
+   * <code>Network::onTableExists('users');</code>
+   *
+   * ---
+   * @param string $tableName Имя таблицы для проверки
    * @return bool
-   *
-   * @example Network::onTableExists('users');
-   * @description Проверяет, существует ли таблица с указанным именем / Checks if a table with the given name exists
+   * @see Network::onTableAllExists() для пакетной инициализации всех таблиц
    */
   private static function onTableExists(string $tableName)
   {
@@ -150,13 +171,27 @@ class Network extends Session
   }
 
   /**
+   * **Авто-проверка и добавление колонки в таблицу**
+   *
+   * _Позволяет убедиться, что указанная колонка присутствует. Если колонки нет — она будет создана автоматически._
+   *
+   * ---
+   * **Сценарии использования:**
+   * 1. Проверить и создать новую колонку
+   *    - <code>$this->onColumnExists('my_column', 'users');</code>
+   *
+   * ---
+   * **Аргументы функции:**
+   * - <b>$columnName</b> (string): название добавляемой/проверяемой колонки.
+   * - <b>$tableName</b>  (string): таблица для проверки/создания.
+   *
+   * ---
+   * **Возвращает:** <b>true</b> при успехе, <b>false</b> — при ошибке.
+   *
+   * ---
    * @param string $columnName
    * @param string $tableName
-   * @return [type]
-   *
-   * @example $this->onColumnExists('Имя колонки', 'Имя таблицы');
-   * @description автопроверка на существование колонок в таблице и автосоздание колонки / auto-checking coluns in table and auto-creating column if have not
-   *
+   * @return bool
    */
   public static function onColumnExists(string $columnName, string $tableName)
   {
@@ -203,14 +238,27 @@ class Network extends Session
   }
 
   /**
-   * Выполняет перенаправление пользователя на указанный путь
+   * **Перенаправление пользователя**
    *
-   * @param string $path Путь для перенаправления (относительно корня сайта)
-   * @throws \Exception В случае ошибки при перенаправлении
-   * @return bool false в случае ошибки, завершает выполнение скрипта при успешном редиректе
+   * -- _Безопасно выполняет redirect на указанный путь. Обнаруживает циклические и некорректные перенаправления._
    *
-   * @example Network::onRedirect('/profile');
-   * @description Перенаправляет пользователя на указанный путь / Redirects user to the specified path
+   * ---
+   * **Аргументы:**
+   * - <b>$path</b> (string): Путь для перенаправления (например, <code>'/profile'</code>)
+   *
+   * ---
+   * **Возвращает:**
+   * - <code>false</code> (в случае ошибки)
+   * - <i>Завершает выполнение скрипта при успешном редиректе</i>
+   *
+   * ---
+   * **Формат использования:**
+   * <code>Network::onRedirect('/profile');</code>
+   *
+   * ---
+   * @param string $path путь для перенаправления (абсолютный)
+   * @throws \Exception при ошибке редиректа
+   * @return bool false при ошибке, exit при успехе
    */
   public static function onRedirect(string $path)
   {
@@ -267,12 +315,24 @@ class Network extends Session
   }
 
   /**
-   * Запускает маршрутизацию на сайте
+   * <b>Запуск маршрутизации в приложении</b>
    *
+   * -- _Автоматически выбирает метод и маршрут, запускает контроллеры и методы в зависимости от совпадения_
+   *
+   * ---
+   * **Сценарии использования:**
+   * - Запустить маршрутизацию: <code>Network::onRoute();</code>
+   *
+   * ---
+   * **Поддерживает:**
+   *  - GET/POST/HEAD маршруты
+   *  - Фолбэк GET-обработчиков для POST/HEAD
+   *  - Очистку и унификацию маршрутов
+   *  - Автоматический вызов метода контроллера или callables
+   *
+   * ---
    * @return void
-   *
-   * @example Network::onRoute();
-   * @description служит для запуска маршрутизации на сайте / starts routing on the site
+   * @see self::$patterns для добавления маршрутов вручную
    */
   public static function onRoute()
   {
@@ -355,12 +415,17 @@ class Network extends Session
   }
 
   /**
-   * Регистрирует автозагрузчик классов для приложения
+   * <b>Авто-загрузчик классов приложения</b>
    *
+   * -- _Гарантирует автоматическую подгрузку всех классов из пространства имён App\Models\..._
+   *
+   * ---
+   * **Использование:**
+   * - Для автозагрузки классов: <code>Network::onAutoloadRegister();</code>
+   *
+   * ---
    * @return void
-   *
-   * @example Network::onAutoloadRegister();
-   * @description Регистрирует функцию автозагрузки классов, чтобы автоматически подключать файлы классов при их использовании / Registers an autoloader function to automatically include class files when they are used
+   * @see https://www.php.net/manual/ru/function.spl-autoload-register.php для низкоуровневой информации
    */
   public static function onAutoloadRegister(): void
   {
@@ -377,21 +442,33 @@ class Network extends Session
   }
 
   /**
-   * Отправляет электронное письмо с помощью PHPMailer
+   * <b>Отправка email через PHPMailer</b>
    *
-   * @param array $data Ассоциативный массив с параметрами письма:
-   *  - 'to_email' (string): адрес получателя
-   *  - 'subject' (string): тема письма
-   *  - 'body' (string): HTML-содержимое письма
+   * -- <i>Фасад для быстрой отправки писем в современном формате. Учитывает все параметры письма.</i>
    *
-   * @return bool true в случае успешной отправки, false в случае ошибки
+   * ---
+   * **Сценарии:**
+   * - Массовая рассылка, служебное сообщение, уведомления.
    *
-   * @example $this->onPHPMailer([
+   * ---
+   * **Ожидаемые ключи в массиве <code>$data</code>:**
+   *   - <b>'to_email'</b>   — email получателя (string)
+   *   - <b>'subject'</b>    — тема письма (string)
+   *   - <b>'body'</b>       — HTML/текст для тела (string)
+   *
+   * ---
+   * **Пример вызова:**
+   * <pre>
+   * $this->onPHPMailer([
    *     'to_email' => 'user@example.com',
-   *     'subject' => 'Тема письма',
-   *     'body' => '<b>Привет!</b> Это тестовое письмо.'
+   *     'subject'  => 'Тема письма',
+   *     'body'     => '&lt;b&gt;Привет!&lt;/b&gt; Это тест.'
    * ]);
-   * @description Отправляет письмо на указанный email с заданной темой и содержимым / Send email to specified address with subject and body
+   * </pre>
+   *
+   * ---
+   * @param array $data ассоциативный массив с параметрами письма
+   * @return bool true, если письмо отправлено успешно, иначе false
    */
   public function onPHPMailer(array $data)
   {
@@ -431,21 +508,29 @@ class Network extends Session
   }
 
   /**
-   * Обрабатывает вызов неизвестного метода (callback) для маршрута
+   * <b>Обработка некорректных callback-ов для маршрутов</b>
    *
-   * @param string $path Путь маршрута, при котором произошла ошибка
-   * @param mixed $callback Callback, который не найден или не может быть вызван
+   * -- <i>Автоматически отображает страницу с ошибкой при попытке вызова неизвестного метода/обработчика</i>
    *
+   * ---
+   * **Аргументы:**
+   * - <b>$path</b> (string): путь маршрута
+   * - <b>$callback</b>: объект или функция, вызвавшие ошибку
+   *
+   * ---
+   * <b>Использование:</b>
+   * <code>Network::handleInvalidCallback('/profile', 'UserController@show');</code>
+   *
+   * ---
+   * @param string $path
+   * @param mixed $callback
    * @return void
-   *
-   * @example Network::handleInvalidCallback('/profile', 'UserController@show');
-   * @description Показывает страницу ошибки при попытке вызвать неизвестный метод для маршрута / Show error page when trying to call unknown method for route
    */
   public static function handleInvalidCallback(string $path, $callback): void
   {
     $callbackType = is_object($callback) ? get_class($callback) : gettype($callback);
     $callbackName = is_string($callback) ? $callback : $callbackType;
-
+    $request_method = $_SERVER['REQUEST_METHOD'] === 'POST' ? 'post' : 'get';
     http_response_code(500);
 
     ob_start(); ?>
@@ -467,7 +552,7 @@ class Network extends Session
           <div class="w-10 h-10 rounded-lg flex items-center justify-center">
             <img src="app/Models/Network/assets/logo.png" alt="logo">
           </div>
-          <span class="text-black text-2xl font-bold">Qwees_CorePro</span>
+          <span class="text-black text-2xl font-bold">QweesCore</span>
         </div>
 
         <div class='text-9xl font-bold text-red-500'>ERROR</div>
@@ -485,7 +570,7 @@ class Network extends Session
           <div class='text-gray-400 mb-2'>// Вызываеться неизвестный метод при вызове:</div>
           <div class='text-white'>
             <span class='text-blue-400'>Routes</span><span class='text-blue-300'>::</span><span
-              class='text-indigo-400'>addRoutes</span><span class='text-yellow-300'>(</span><span
+              class='text-indigo-400'><?= $request_method ?> ?></span><span class='text-yellow-300'>(</span><span
               class='text-red-300'>'</span><span class='text-green-300'><?= htmlspecialchars(
                 $path
               ) ?></span><span class='text-red-300'>'</span>,
@@ -504,14 +589,22 @@ class Network extends Session
   }
 
   /**
-   * Автоматический вывод деталей проблем/логов для диагностики
+   * <b>Отладочная детализация</b>
    *
-   * Выводит информацию об ошибках в удобном формате, включая детали из базы данных
+   * ---
+   * <i>Автоматически выводит подробную информацию о состоянии, ошибках и параметрах запроса для диагностики.</i>
    *
-   * @param array $debug_info Массив строк с информацией для отладки
-   * @param mixed $db_error Детали ошибки из базы данных (глобальная переменная $DB_ERROR_INFO)
-   * @param string $title Заголовок блока диагностики
-   * @param bool $as_json Также вывести как JSON (для API ответов)
+   * ---
+   * **Аргументы:**
+   * - <b>$debug_info</b> (array): массив строк с подсказками/описаниями
+   * - <b>$db_error</b> (mixed): массив или объект с деталями SQL/DB-ошибки (или null)
+   * - <b>$title</b> (string): заголовок блока вывода
+   * - <b>$as_json</b> (bool): также вывести диагностический блок в формате JSON
+   *
+   * ---
+   * <b>Рекомендуется:</b> при обработке исключений и сложных ошибок взаимодействия с БД.
+   *
+   * ---
    * @return void
    */
   public static function debugOutput(array $debug_info = [], $db_error = null, string $title = 'Диагностика проблемы', bool $as_json = true)
@@ -574,11 +667,21 @@ class Network extends Session
   }
 
   /**
-   * Быстрый вывод ошибки с минимальной информацией
+   * <b>Быстрый минимальный вывод ошибки</b>
    *
-   * @param string $message Сообщение об ошибке
-   * @param mixed $db_error Детали ошибки из базы данных
-   * @param int $http_code HTTP код ответа
+   * -- <i>Позволяет отправить структурированное сообщение об ошибке с HTTP-кодом и деталями</i>
+   *
+   * ---
+   * **Аргументы:**
+   * - <b>$message</b> (string): текст ошибки
+   * - <b>$db_error</b> (mixed): подробности из базы данных (опционально)
+   * - <b>$http_code</b> (int): HTTP-код ответа
+   *
+   * ---
+   * **Пример:**
+   * <code>Network::errorOutput('Фатальная ошибка!', null, 500);</code>
+   *
+   * ---
    * @return void
    */
   public static function errorOutput(string $message, $db_error = null, int $http_code = 400)

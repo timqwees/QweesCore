@@ -13,8 +13,7 @@ use App\Models\Network\Message;
 use App\Models\User\User;
 use Exception;
 use LDAP\ResultEntry;
-
-// Session::init(); // инициализируем сессию, чтобы использовать $_SESSION
+use App\Controllers\API\API;
 
 class Functions
 {
@@ -23,12 +22,18 @@ class Functions
   # Главная страница || Main page (В маршрутных функциях писать, только маршрут в path болье ничего не нужно)
   public function on_Main($path = '/public/pages/main/index.html')
   {
-    Routes::auto_element(dirname(__DIR__, 3) . $path);//мини добавка элементов проверок
+    Routes::auto_element(dirname(__DIR__, 3) . $path, get_defined_vars());
   }
 
   # Документация || Docs page
   public function on_Docs($path = '/public/pages/docs/index.html')
   {
-    Routes::auto_element(dirname(__DIR__, 3) . $path);//мини добавка элементов проверок
+    Routes::auto_element(dirname(__DIR__, 3) . $path, get_defined_vars());
+  }
+
+  # API
+  public function on_API()
+  {
+    echo API::send('/public/pages/main/qwees.json');
   }
 }

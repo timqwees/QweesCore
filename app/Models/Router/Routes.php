@@ -7,19 +7,31 @@ use Setting\Route\Function\Functions;
 class Routes extends Network
 {
   /**
-   * Регистрирует маршрут с указанным HTTP-методом, путем и обработчиком
+   * **Регистрирует маршрут по HTTP-методу, пути и обработчику**
    *
-   * @param string $method HTTP-метод (например, 'GET', 'POST', 'PUT', 'DELETE')
-   * @param string $path Путь маршрута (например, '/user/{id}')
-   * @param callable|array|string $callback Обработчик маршрута: функция, массив [Класс, метод] или имя встроенной функции
+   * ---
+   * ##### <u>Возможности</u>:
+   * - **Методы**: 'GET', 'POST', 'PUT', 'DELETE', ...
+   * - _Гибкие плейсхолдеры_ — поддержка вида `/user/{id}` или `item={sku}`
+   * - <i>Любой обработчик</i>: функция, `[Класс, метод]`, имя метода класса функций
+   *
+   * ---
+   * **Параметры**:
+   * - <b>string</b> <code>$method</code>
+   *   HTTP-метод маршрута, например: `'GET'`, `'POST'`
+   * - <b>string</b> <code>$path</code>
+   *   URI-путь, например: <kbd>/user/{id}</kbd>
+   * - <b>callable|array|string</b> <code>$callback</code>
+   *   Функция-обработчик, массив [Класс, метод] или строка — имя метода
+   *
+   * ---
+   * **Примеры использования:**
+   * 1. <kbd>self::addRoute('GET', '/user/{id}', [UserController::class, 'show']);</kbd>
+   *    <sub>— отдаёт обработку UserController::show для пути /user/123</sub>
+   * 2. <kbd>self::addRoute('POST', '/login', 'loginFunction');</kbd>
+   *    <sub>— вызывает встроенную функцию loginFunction для POST /login</sub>
    *
    * @return void
-   *
-   * @example self::addRoute('GET', '/user/{id}', [UserController::class, 'show']);
-   * @description Регистрирует маршрут GET /user/{id} с обработчиком UserController::show
-   *
-   * @example self::addRoute('POST', '/login', 'loginFunction');
-   * @description Регистрирует маршрут POST /login с обработчиком loginFunction
    */
   public static function addRoute(string $method, string $path, $callback): void
   {
@@ -52,18 +64,21 @@ class Routes extends Network
   }
 
   /**
-   * Регистрирует маршрут GET с указанным путем и обработчиком
+   * **Быстрая регистрация GET-маршрута**
    *
-   * @param string $path Путь маршрута (например, '/user/{id}')
-   * @param callable|array|string $callback Обработчик маршрута: функция, массив [Класс, метод] или имя встроенной функции
+   * ---
+   * <b>Удобство:</b> <i>Позволяет объявлять маршруты для GET-запросов лаконично.</i>
    *
+   * @param string $path      <span style="color:#777">Путь, поддерживаются плейсхолдеры</span>
+   * @param callable|array|string $callback <span style="color:#777">Функция-обработчик/класс/метод</span>
+   *
+   * ---
+   * <b>Примеры:</b>
+   * - <kbd>self::get('/article/{slug}', [ArticleController::class, 'view'])</kbd>
+   * - <kbd>self::get('/login', 'loginForm')</kbd>
+   *
+   * ---
    * @return void
-   *
-   * @example self::get('/user/{id}', [UserController::class, 'show']);
-   * @description Регистрирует маршрут GET /user/{id} с обработчиком UserController::show
-   *
-   * @example self::get('/login', 'loginFunction');
-   * @description Регистрирует маршрут GET /login с обработчиком loginFunction
    */
   public static function get(string $path, $callback): void
   {
@@ -71,18 +86,21 @@ class Routes extends Network
   }
 
   /**
-   * Регистрирует маршрут POST с указанным путем и обработчиком
+   * **Быстрая регистрация POST-маршрута**
    *
-   * @param string $path Путь маршрута (например, '/user/{id}')
-   * @param callable|array|string $callback Обработчик маршрута: функция, массив [Класс, метод] или имя встроенной функции
+   * ---
+   * <b>Для обработки форм и POST-запросов.</b>
    *
+   * @param string $path                URI с плейсхолдерами или без
+   * @param callable|array|string $callback   Любая функция, [класс, метод] или имя метода встроенного класса
+   *
+   * ---
+   * <b>Примеры:</b>
+   * - <code>self::post('/profile/{id}/update', [ProfileController::class, 'update'])</code>
+   * - <code>self::post('/login', 'submitLogin')</code>
+   *
+   * ---
    * @return void
-   *
-   * @example self::post('/user/{id}', [UserController::class, 'update']);
-   * @description Регистрирует маршрут POST /user/{id} с обработчиком UserController::update
-   *
-   * @example self::post('/login', 'loginFunction');
-   * @description Регистрирует маршрут POST /login с обработчиком loginFunction
    */
   public static function post(string $path, $callback): void
   {
@@ -90,15 +108,28 @@ class Routes extends Network
   }
 
   /**
-   * Запускает процесс маршрутизации и обрабатывает входящий HTTP-запрос
+   * <b>Запуск маршрутизатора и обработка текущего запроса</b>
    *
+   * ---
+   * <u>Что делает:</u>
+   * - Определяет HTTP-метод и запрошенный URI
+   * - **Сопоставляет** маршрут с зарегистрированными шаблонами (регулярными выражениями)
+   * - Передаёт параметры адреса **обработчику** (функция, контроллер или встроенный метод)
+   * - *Если ничего не найдено — автоматически отдаёт страницу 404*
+   *
+   * ---
+   * <b>Пример запуска:</b>
+   * <code>Routes::dispatch();</code>
+   *
+   * <details><summary>Варианты маршрутов</summary>
+   * <ul>
+   *   <li><code>GET /user/{id}</code> вызовет <i>UserController::show</i></li>
+   *   <li><code>POST /login</code> вызовет <i>loginFunction</i></li>
+   * </ul>
+   * </details>
+   *
+   * ---
    * @return void
-   *
-   * @example self::dispatch();
-   * @description Запускает маршрутизатор, сопоставляет текущий URI и метод запроса с зарегистрированными маршрутами и вызывает соответствующий обработчик.
-   *
-   * Если маршрут найден, вызывается соответствующий контроллер или функция-обработчик с параметрами из URI.
-   * Если маршрут не найден, возвращается страница 404.
    */
   public static function dispatch(): void
   {
@@ -197,9 +228,11 @@ class Routes extends Network
   }
 
   /**
-   * Страница 404
+   * <b>Выводит страницу 404 для несуществующего маршрута</b>
+   *
+   * @param string $path URI или путь, по которому не найден маршрут
+   * @return void
    */
-
   public static function error_404(
     string $path
   ) {
@@ -210,17 +243,29 @@ class Routes extends Network
   }
 
   /**
-   * Автоматически подключает и отображает элемент по указанному пути
+   * **Автоматическое подключение и отображение view-элементов**
    *
-   * @param string $path Путь к файлу, который необходимо подключить
+   * _Подключает файл по указанному пути с передачей параметров (если они есть), либо показывает 404._
+   *
+   * ---
+   * @param string $path <b>Путь</b> к подключаемому PHP/HTML-файлу
+   * @param array  $params <i>Массив параметров</i> (будут доступны как переменные внутри файла)
+   *
    * @return void
    *
-   * @example self::auto_element('/path/to/file.php');
-   * @description Подключает файл по указанному пути, если он существует, иначе вызывает страницу 404
+   * ---
+   * <b>Примеры:</b>
+   * - <kbd>Routes::auto_element('/view/blocks/user_card.php', ['user'=>$user]);</kbd>
+   * - <kbd>Routes::auto_element('/templates/404.php');</kbd>
+   *
+   * ---
    */
-  public static function auto_element($path)
+  public static function auto_element(string $path, array $params = [])
   {
     if (file_exists($path)) {
+      if (!empty($params)) {
+        extract($params, EXTR_SKIP);
+      }
       include_once $path;
     } else {
       self::error_404(__METHOD__);
